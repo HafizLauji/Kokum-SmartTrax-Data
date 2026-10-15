@@ -353,7 +353,7 @@ function byId(id){return S.programs.filter(function(p){return p.id===id})[0]}
 function toast(t){var e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){e.hidden=true},2600)}
 
 /* ---------- storage: Google Apps Script + Google Sheets ---------- */
-var API_URL='PASTE_URL_WEB_APP_DI_SINI'; // tampal URL Web App Apps Script di sini (lihat README)
+var API_URL='https://script.google.com/macros/s/AKfycbwOMLVV13STZ5aj4td8HubuAzvxEoMcSkpr2ki8XQuJOPzB-3CsL72k92_DOTQgiXtw/exec'; // tampal URL Web App Apps Script di sini (lihat README)
 var KEY='kokum.kod';
 function hasApi(){return /^https:\/\/script\.google\.com\//.test(API_URL)}
 function kod(){try{return localStorage.getItem(KEY)||''}catch(e){return ''}}
