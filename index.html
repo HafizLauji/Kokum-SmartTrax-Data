@@ -346,6 +346,37 @@ tr:last-child td{border-bottom:0}
 .note.sugg{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:color-mix(in srgb,var(--amber) 14%,var(--surface));color:var(--fg)}
 .cutirow.ro b{font-weight:600}
 .cutisum{font-weight:700;cursor:pointer}
+
+/* ---------- Fasa 3 dan pembetulan paparan ---------- */
+.deco{height:auto;min-height:190px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:20px;--ts:clamp(64px,6.6vw,92px)}
+.deco blockquote{position:static;font-size:clamp(19px,1.9vw,23px)}
+.deco .tiles{display:flex;gap:clamp(10px,1.2vw,16px);align-items:flex-start;padding-bottom:14px}
+.deco .tile{position:static;width:var(--ts);height:var(--ts);border-radius:calc(var(--ts)*.28);flex:none}
+.deco .tile:nth-child(2){transform:translateY(14px)}
+.deco .tile svg{width:56%;height:56%}
+.side{min-height:0}
+@media (min-width:901px) and (max-height:820px){
+  .side{gap:12px;padding-top:16px;padding-bottom:16px}
+  .brand{gap:6px}.brand img{width:66px}
+  .nav button{padding:9px 14px}
+  .side .tag i{font-size:26px}.side .tag small{margin-top:8px}
+}
+@media (min-width:901px) and (max-height:700px){
+  .side{gap:8px;padding-top:12px;padding-bottom:12px}
+  .brand img{width:50px}.brand span{display:none}.brand b{font-size:17px}
+  .nav{gap:2px}.nav button{padding:7px 12px}
+  .side .tag i{font-size:22px}.side .tag small{margin-top:4px;font-size:9px;letter-spacing:.26em}
+}
+@media (min-width:901px) and (max-height:590px){
+  .brand img{display:none}.side .tag i{display:none}
+}
+.stack>.card.chart svg{max-height:280px}
+.pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0}
+.mini{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:2px}
+.unk{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.unk .btn{padding:6px 11px;font-size:12.5px}
+.mtab td,.mtab th{white-space:nowrap}
+.mtab td.wrap{white-space:normal;min-width:160px}
 </style>
 </head>
 <body>
@@ -753,7 +784,7 @@ function vUtama(){
   var P=yearProgs(),c=S.config;fixSel();
   var cnt=function(s){return P.filter(function(p){return p.status===s}).length};
   var akan=cnt('akan')+cnt('perancangan'),ber=cnt('berlangsung'),sel=cnt('selesai');
-  var murid=(c.penyertaan||[]).reduce(function(a,b){return a+(+b||0)},0);
+  var PN=penyertaan(P),murid=PN.jum;
   var stat=function(col,ci,ic,n,l,s){return '<div class="stat" style="--c:var(--'+col+');--ci:var(--'+ci+')"><div class="ic">'+svg(ic)+'</div><div><b>'+n+'</b><span>'+l+'</span><small>'+s+'</small></div></div>'};
   var months=[];for(var i=0;i<12;i++)months.push(0);P.forEach(function(p){months[pd(p.tarikh).m-1]++});
   var parts=[{v:akan,c:'var(--violet)',l:'Akan Datang'},{v:ber,c:'var(--blue)',l:'Sedang Berlangsung'},{v:sel,c:'var(--green)',l:'Selesai'}];
@@ -762,16 +793,16 @@ function vUtama(){
   var tile=function(css,ic,t,l){return '<div class="tile" style="background:'+css+';left:'+l+'px;top:'+t+'px">'+svg(PATHS[ic],48)+'</div>'};
   return '<section class="banner"><div><div class="hi">Selamat Datang ke</div><h1>KOKUM<br>SMARTTRAX</h1><h2>'+esc(BRAND.nama.toUpperCase())+'</h2>'+
    '<p>Urus semua aktiviti kokurikulum dengan lebih mudah, tersusun dan bermakna.</p><div class="chips"><span><i style="background:var(--amber)"></i>AKTIF</span><span><i style="background:var(--blue)"></i>TERATUR</span><span><i style="background:var(--pink)"></i>MUDAH</span><span><i style="background:var(--gold)"></i>BERMAKNA</span></div></div>'+
-   '<div class="deco" aria-hidden="true"><blockquote>Kokurikulum<br>Membina Sahsiah<br>Melahirkan Potensi</blockquote>'+tile('linear-gradient(135deg,#d9a62e,#e8742e)','cup',58,8)+tile('linear-gradient(135deg,#2f9e6b,#1ea5b8)','ball',92,112)+tile('linear-gradient(135deg,#d9672e,#8e2a54)','tent',20,214)+'</div></section>'+
+   '<div class="deco" aria-hidden="true"><blockquote>Kokurikulum<br>Membina Sahsiah<br>Melahirkan Potensi</blockquote><div class="tiles">'+tile('linear-gradient(135deg,#d9a62e,#e8742e)','cup',58,8)+tile('linear-gradient(135deg,#2f9e6b,#1ea5b8)','ball',92,112)+tile('linear-gradient(135deg,#d9672e,#8e2a54)','tent',20,214)+'</div></div></section>'+
   '<section class="stats">'+stat('violet','violet-ink','<path d="M4 5h16v16H4zM4 10h16M8 3v4M16 3v4"/>',P.length,'Jumlah Program','Tahun '+curYear())+
    stat('blue','blue-ink','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ber,'Sedang Berjalan','Aktif sekarang')+
    stat('green','green-ink','<path d="m5 12 5 5 9-10"/>',sel,'Selesai','Tahniah!')+
    stat('amber','amber-ink','<path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"/>',akan,'Akan Datang','Belum bermula')+
-   stat('pink','violet-ink','<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 5a3.5 3.5 0 0 1 0 7M18 14c2.5.5 4 2.5 4 5.5"/>',murid,'Jumlah Murid Terlibat','Tahun '+curYear())+'</section>'+fokus()+
+   stat('pink','violet-ink','<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 5a3.5 3.5 0 0 1 0 7M18 14c2.5.5 4 2.5 4 5.5"/>',murid,'Penyertaan Murid','Tahun '+curYear())+'</section>'+fokus()+
   '<section class="charts">'+
    '<div class="card chart"><h3><i>'+svg('<path d="M5 20V10M12 20V4M19 20v-7"/>')+'</i>Trend Program Bulanan</h3>'+bars(months,MON,{label:'Program setiap bulan'})+'</div>'+
    '<div class="card"><h3><i>'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 4"/>')+'</i>Status Program</h3><div class="donut">'+donut(parts,P.length)+'<div class="legend">'+parts.map(function(p){return '<div><i style="background:'+p.c+'"></i><span>'+p.l+'<br><b>'+p.v+'</b> ('+pct(p.v)+'%)</span></div>'}).join('')+'</div></div></div>'+
-   '<div class="card chart"><h3><i>'+svg(NAVICON.warga)+'</i>Penyertaan Mengikut Tahun</h3>'+bars((c.penyertaan||[0,0,0,0,0,0]).map(Number),['T1','T2','T3','T4','T5','T6'],{vals:true,step:40,colors:['var(--violet)','var(--pink)','var(--amber)','var(--green)','var(--blue)','var(--violet)'],label:'Murid setiap tahun'})+'</div></section>'+
+   '<div class="card chart"><h3><i>'+svg(NAVICON.warga)+'</i>Penyertaan Mengikut Tahun</h3>'+bars(PN.t,['T1','T2','T3','T4','T5','T6'],{vals:true,step:stepFor(Math.max.apply(null,PN.t.concat([0]))),colors:['var(--violet)','var(--pink)','var(--amber)','var(--green)','var(--blue)','var(--violet)'],label:'Murid setiap tahun'})+'</div></section>'+
   '<section class="work"><div><div class="sechead"><h2>Program Terkini</h2><button class="link" data-act="nav" data-p="program">Lihat Semua →</button></div>'+
    (list.length?'<div class="grid3">'+list.map(card).join('')+'</div>':emptyProgs())+'</div>'+
    '<div><div class="sechead"><h2>Maklumat Program</h2></div>'+(S.programs.length?detail(byId(S.sel)):'<div class="card empty"><p>Maklumat program akan dipaparkan di sini.</p></div>')+'</div></section>'+galeri();
@@ -791,18 +822,54 @@ function vProgram(){
 }
 function vWarga(){
   var rows=S.guru.slice().sort(function(a,b){return a.nama.localeCompare(b.nama)});
-  var cnt=function(n){return S.programs.filter(function(p){return p.pic===n}).length};
-  return '<div class="pagehead"><div><h1>Warga Kokum</h1><p>Guru penasihat dan pegawai penyelaras unit kokurikulum</p></div><button class="btn pri" data-act="newguru">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah warga</button></div>'+
-   '<div class="card tablewrap">'+(rows.length?'<table><thead><tr><th>Nama</th><th>Jawatan</th><th>Unit</th><th class="num">Program (PIC)</th><th></th></tr></thead><tbody>'+rows.map(function(g){return '<tr><td><b>'+esc(g.nama)+'</b></td><td>'+esc(g.jawatan)+'</td><td>'+esc(g.unit||'Semua unit')+'</td><td class="num">'+cnt(g.nama)+'</td><td class="num"><button class="btn" data-act="editguru" data-id="'+esc(g.id)+'">Sunting</button></td></tr>'}).join('')+'</tbody></table>':'<div class="empty"><h3>Belum ada warga kokum</h3><p>Tambah guru penasihat supaya nama mereka boleh dipilih sebagai PIC program.</p></div>')+'</div>';
+  var unk=unknownPics(),ada=rows.filter(function(g){return picProgs(g).length}).length;
+  var stat=function(col,ci,ic,n,l,sub){return '<div class="stat" style="--c:var(--'+col+');--ci:var(--'+ci+')"><div class="ic">'+svg(ic)+'</div><div><b>'+n+'</b><span>'+l+'</span><small>'+sub+'</small></div></div>'};
+  var head='<div class="pagehead"><div><h1>Warga Kokum</h1><p>Guru penasihat dan pegawai penyelaras unit kokurikulum</p></div><button class="btn pri" data-act="newguru">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah warga</button></div>';
+  if(!rows.length&&!unk.length)return head+'<div class="card empty"><h3>Belum ada warga kokum</h3><p>Tambah guru penasihat supaya nama mereka boleh dipilih sebagai PIC program.</p></div>';
+  return head+
+   (rows.length?'<section class="pstats">'+
+    stat('violet','violet-ink',NAVICON.warga,rows.length,'Warga kokum','Dalam senarai')+
+    stat('green','green-ink','<path d="m5 12 5 5 9-10"/>',ada,'Ada tugasan PIC','Memegang sekurang-kurangnya satu program')+
+    stat('amber','amber-ink','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',rows.length-ada,'Belum ada tugasan','Belum jadi PIC mana-mana program')+'</section>':'')+
+   (unk.length?'<div class="card" style="margin-bottom:14px"><h3><i>'+svg('<path d="M12 4 3 20h18zM12 10v5M12 17.5h.01"/>')+'</i>Nama PIC belum ada dalam senarai warga</h3><p style="color:var(--muted);font-size:13px">Nama ini digunakan sebagai PIC dalam program tetapi belum didaftarkan di sini. Tekan nama untuk menambahnya.</p><div class="unk">'+unk.map(function(n){return '<button class="btn" data-act="addpic" data-n="'+esc(n)+'">'+svg('<path d="M12 5v14M5 12h14"/>')+esc(n)+'</button>'}).join('')+'</div></div>':'')+
+   (rows.length?'<div class="card tablewrap"><table class="mtab"><thead><tr><th>Nama</th><th>Jawatan</th><th>Unit</th><th>Program (PIC)</th><th></th></tr></thead><tbody>'+rows.map(function(g){
+     var L=picProgs(g),nm=L.slice(0,2).map(function(p){return esc(p.nama)}).join(', ')+(L.length>2?' dan '+(L.length-2)+' lagi':'');
+     return '<tr><td><b>'+esc(g.nama)+'</b></td><td>'+esc(g.jawatan||'-')+'</td><td>'+esc(g.unit||'Semua unit')+'</td><td class="wrap">'+(L.length?'<b>'+L.length+'</b><span class="mini">'+nm+'</span>':'<span style="color:var(--muted)">Belum ada</span>')+'</td><td class="num"><button class="btn" data-act="editguru" data-id="'+esc(g.id)+'">Sunting</button></td></tr>'}).join('')+'</tbody></table></div>':'');
 }
 function vMurid(){
-  var c=S.config,pn=(c.penyertaan||[0,0,0,0,0,0]),tot=pn.reduce(function(a,b){return a+(+b||0)},0);
-  var list=S.programs.slice().sort(function(a,b){return (+b.murid||0)-(+a.murid||0)}),mx=Math.max.apply(null,list.map(function(p){return +p.murid||0}).concat([1]));
-  return '<div class="pagehead"><div><h1>Murid &amp; Penyertaan</h1><p>Bilangan murid terlibat dalam kokurikulum tahun '+curYear()+': <b>'+tot+'</b></p></div></div>'+
-  '<div class="stack"><form class="card" id="yearForm"><h3>Penyertaan mengikut tahun</h3><div class="yeargrid">'+
-   [1,2,3,4,5,6].map(function(n,i){return '<label for="y'+n+'">Tahun '+n+'<input type="number" min="0" id="y'+n+'" name="y'+i+'" value="'+(+pn[i]||0)+'"></label>'}).join('')+'</div><div class="btns" style="margin-top:12px"><button class="btn pri" type="submit">Simpan</button></div></form>'+
-  '<div class="card tablewrap"><h3>Murid mengikut program</h3>'+(list.length?'<table><thead><tr><th>Program</th><th>Unit</th><th class="num">Murid</th><th>Kadar</th></tr></thead><tbody>'+list.map(function(p){return '<tr><td><b>'+esc(p.nama)+'</b></td><td>'+esc(p.unit)+'</td><td class="num">'+(+p.murid||0)+'</td><td><div class="bar"><i style="width:'+Math.round((+p.murid||0)*100/mx)+'%"></i></div></td></tr>'}).join('')+'</tbody></table>':'<div class="empty"><p>Tiada program lagi.</p></div>')+'</div></div>';
+  var P=sorted(yearProgs()),PN=penyertaan(P),mx=Math.max.apply(null,PN.t.concat([0])),tp=PN.t.indexOf(mx);
+  var avg=P.length?Math.round(PN.jum/P.length):0;
+  var stat=function(col,ci,ic,n,l,sub){return '<div class="stat" style="--c:var(--'+col+');--ci:var(--'+ci+')"><div class="ic">'+svg(ic)+'</div><div><b>'+n+'</b><span>'+l+'</span><small>'+sub+'</small></div></div>'};
+  var head='<div class="pagehead"><div><h1>Murid &amp; Penyertaan</h1><p>Berapa ramai murid menyertai program kokurikulum tahun '+esc(curYear())+'</p></div></div>';
+  if(!P.length)return head+emptyProgs();
+  var rows=UNITS.map(function(u){var l=P.filter(function(p){return p.unit===u});return {u:u,n:l.length,j:sumA(l.map(muridOf))}}).filter(function(r){return r.n}),umx=Math.max.apply(null,rows.map(function(r){return r.j}).concat([1]));
+  var pmx=Math.max.apply(null,P.map(muridOf).concat([1]));
+  return head+
+   '<div class="note">Angka ini dikira sendiri daripada bilangan murid setiap tahun yang diisi pada setiap program. Seorang murid yang menyertai tiga program dikira tiga penyertaan.</div>'+
+   (PN.tanpa>0?'<div class="note sugg" style="margin-top:8px"><span><b>'+PN.tanpa+'</b> penyertaan dalam '+PN.bil+' program belum dinyatakan tahunnya, jadi tidak masuk dalam carta di bawah. Sunting program itu dan isi bilangan murid mengikut tahun.</span></div>':'')+
+   '<section class="pstats">'+
+    stat('pink','violet-ink',NAVICON.warga,PN.jum,'Jumlah penyertaan','Tahun '+esc(curYear()))+
+    stat('violet','violet-ink',NAVICON.program,avg,'Purata setiap program',P.length+' program')+
+    stat('amber','amber-ink',NAVICON.murid,mx>0?'Tahun '+(tp+1):'-','Paling ramai menyertai',mx>0?mx+' penyertaan':'Belum ada data')+
+   '</section>'+
+   '<div class="stack"><div class="card chart"><h3><i>'+svg(NAVICON.murid)+'</i>Penyertaan mengikut tahun</h3>'+bars(PN.t,['Thn 1','Thn 2','Thn 3','Thn 4','Thn 5','Thn 6'],{vals:true,step:stepFor(mx),colors:['var(--violet)','var(--pink)','var(--amber)','var(--green)','var(--blue)','var(--violet)'],label:'Penyertaan murid setiap tahun'})+'</div>'+
+   '<div class="card tablewrap"><h3>Mengikut unit</h3><table><thead><tr><th>Unit</th><th class="num">Program</th><th class="num">Penyertaan</th><th>Kadar</th></tr></thead><tbody>'+
+    rows.map(function(r){return '<tr><td><b>'+esc(r.u)+'</b></td><td class="num">'+r.n+'</td><td class="num">'+r.j+'</td><td><div class="bar"><i style="width:'+Math.round(r.j*100/umx)+'%"></i></div></td></tr>'}).join('')+'</tbody></table></div>'+
+   '<div class="card tablewrap"><h3>Mengikut program</h3><table class="mtab"><thead><tr><th>Program</th><th>Unit</th>'+[1,2,3,4,5,6].map(function(n){return '<th class="num">T'+n+'</th>'}).join('')+'<th class="num">Jumlah</th></tr></thead><tbody>'+
+    P.map(function(p){var a=mtOf(p);return '<tr><td class="wrap"><b>'+esc(p.nama)+'</b><span class="mini">'+esc(range(p))+'</span></td><td>'+esc(p.unit)+'</td>'+
+     (a?a.map(function(v){return '<td class="num">'+(v||'-')+'</td>'}).join(''):'<td class="num" colspan="6" style="text-align:center;color:var(--muted)">tahun belum dinyatakan</td>')+'<td class="num"><b>'+muridOf(p)+'</b></td></tr>'}).join('')+'</tbody></table></div></div>';
 }
+/* ---------- Fasa 3: penyertaan murid dikira daripada program ---------- */
+function sumA(a){return a.reduce(function(x,y){return x+(+y||0)},0)}
+function mtOf(p){var a=p&&p.dok&&p.dok.mt;if(!Array.isArray(a))return null;return [0,1,2,3,4,5].map(function(i){return Math.max(0,+a[i]||0)})}
+function muridOf(p){var a=mtOf(p);return a?sumA(a):(+p.murid||0)}
+function mvals(p){var a=mtOf(p),o={};[0,1,2,3,4,5].forEach(function(i){o['m'+i]=a?a[i]:''});return o}
+function penyertaan(P){var r={t:[0,0,0,0,0,0],tanpa:0,bil:0};P.forEach(function(p){var a=mtOf(p);if(a)a.forEach(function(v,i){r.t[i]+=v});else if(+p.murid>0){r.tanpa+=(+p.murid||0);r.bil++}});r.jum=sumA(r.t)+r.tanpa;return r}
+function stepFor(m){return m>400?200:m>160?100:m>80?40:m>32?20:m>16?8:4}
+function picKey(n){return String(n||'').trim().toLowerCase()}
+function picProgs(g){var k=picKey(g.nama);return k?S.programs.filter(function(p){return picKey(p.pic)===k}):[]}
+function unknownPics(){var known={},seen={},out=[];S.guru.forEach(function(g){known[picKey(g.nama)]=1});S.programs.forEach(function(p){var k=picKey(p.pic);if(k&&!known[k]&&!seen[k]){seen[k]=1;out.push(String(p.pic).trim())}});return out}
+var JAWATAN=['PK Kokurikulum','Penasihat','Guru Penasihat','Setiausaha','Penolong Setiausaha','Bendahari','AJK'];
 /* ---------- Fasa 2b: tahun paparan, cuti terbina 2027, status automatik ---------- */
 var HOL={
  sumber:'Kalendar Akademik KPM 2027 dan senarai cuti umum 2027 (melalui eCentral.my). Tarikh perayaan Islam ialah anggaran. Sahkan dengan KPM.',
@@ -949,40 +1016,12 @@ function galeri(){
    '<div class="gstrip">'+L.map(function(x){return '<button class="gtile" data-act="viewimg" data-id="'+esc(x.p.id)+'" data-eid="'+esc(x.f.id)+'" aria-label="Lihat gambar '+esc(x.p.nama)+'"><img alt="" data-img="'+esc(x.f.tid||x.f.fid)+'"><span>'+esc(x.p.nama)+'</span></button>'}).join('')+'</div>':
    '<p class="gal-empty">Belum ada gambar. Buka satu program dan tekan "Tambah gambar" supaya gambar aktiviti muncul di sini.</p>')+'</section>';
 }
-function icsEsc(t){return String(t==null?'':t).replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;')}
-function icsFold(l){
-  var enc=new TextEncoder(),out=[],cur='',n=0;
-  Array.from(l).forEach(function(ch){var b=enc.encode(ch).length;if(n+b>(out.length?74:75)){out.push(cur);cur='';n=0}cur+=ch;n+=b});
-  out.push(cur);return out.join('\r\n ');
-}
 function icsDT(iso,t){return iso.replace(/-/g,'')+(t?'T'+t.replace(':','')+'00':'')}
 function backup(){
   var o={dieksport:new Date().toISOString(),sistem:'Kokum SmartTrax SKGG',programs:S.programs,guru:S.guru,config:S.config};
   var bl=new Blob([JSON.stringify(o,null,1)],{type:'application/json'}),an=document.createElement('a');
   an.href=URL.createObjectURL(bl);an.download='sandaran-kokum-smarttrax-'+todayISO()+'.json';document.body.appendChild(an);an.click();
   setTimeout(function(){URL.revokeObjectURL(an.href);an.remove()},3000);toast('Sandaran dimuat turun');
-}
-function exportIcs(){
-  var P=yearProgs().filter(function(p){return p.tarikh});
-  if(!P.length){toast('Tiada program untuk dieksport');return}
-  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Kokum SmartTrax//SKGG//MS','CALSCALE:GREGORIAN','X-WR-CALNAME:Kokum SmartTrax '+curYear()];
-  var stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
-  P.forEach(function(p){
-    var e=endOf(p),timed=p.masaMula&&p.masaTamat&&(e>p.tarikh||p.masaTamat>p.masaMula);
-    L.push('BEGIN:VEVENT','UID:'+p.id+'@kokum-smarttrax','DTSTAMP:'+stamp);
-    if(timed)L.push('DTSTART:'+icsDT(p.tarikh,p.masaMula),'DTEND:'+icsDT(e,p.masaTamat));
-    else{var q=pd(e),nx=new Date(q.y,q.m-1,q.d+1);L.push('DTSTART;VALUE=DATE:'+icsDT(p.tarikh),'DTEND;VALUE=DATE:'+icsDT(isoOf(nx)))}
-    L.push('SUMMARY:'+icsEsc(p.nama));
-    if(p.tempat)L.push('LOCATION:'+icsEsc(p.tempat));
-    var desc=[p.unit,p.pic?'PIC: '+p.pic:'',p.catatan].filter(Boolean).join('\n');
-    if(desc)L.push('DESCRIPTION:'+icsEsc(desc));
-    L.push('END:VEVENT');
-  });
-  L.push('END:VCALENDAR');
-  var bl=new Blob([L.map(icsFold).join('\r\n')+'\r\n'],{type:'text/calendar;charset=utf-8'}),an=document.createElement('a');
-  an.href=URL.createObjectURL(bl);an.download='kokum-smarttrax-'+curYear()+'.ics';document.body.appendChild(an);an.click();
-  setTimeout(function(){URL.revokeObjectURL(an.href);an.remove()},1000);
-  toast(P.length+' program dieksport');
 }
 function cutiModal(){
   var L=cutiUser().slice().sort(function(a,b){return a.mula<b.mula?-1:a.mula>b.mula?1:0});
@@ -1024,7 +1063,7 @@ function vKalendar(){
   return '<div class="pagehead"><div><h1>Kalendar</h1><p>Jadual program kokurikulum</p></div><div class="calnav"><button class="btn" data-act="calprev" aria-label="Bulan sebelum">‹</button><h2>'+MONF[m]+' '+y+'</h2><button class="btn" data-act="calnext" aria-label="Bulan seterusnya">›</button><button class="btn" data-act="caltoday">Hari ini</button></div></div>'+
    '<div class="calbar"><div class="calleg">'+legend+'</div><div class="caltools">'+
    '<button class="fchip" data-act="calview" data-v="grid" aria-pressed="'+(view==='grid')+'">Grid</button><button class="fchip" data-act="calview" data-v="agenda" aria-pressed="'+(view==='agenda')+'">Agenda</button>'+
-   '<button class="btn" data-act="cutimgr">Cuti &amp; acara</button><button class="btn" data-act="ics">Eksport .ics</button><button class="btn pri" data-act="newprog">+ Program</button></div></div>'+body;
+   '<button class="btn" data-act="cutimgr">Cuti &amp; acara</button><button class="btn pri" data-act="newprog">+ Program</button></div></div>'+body;
 }
 function vDokumen(){
   var list=sorted(S.programs);
@@ -1081,25 +1120,29 @@ function guruNames(){return S.guru.map(function(g){return g.nama})}
 function progForm(p){
   p=p||{status:'perancangan',unit:UNITS[0],murid:0,guru:0,tarikh:'',tarikhTamat:'',masaMula:'08:00',masaTamat:'12:00'};
   var isNew=!p.id;
-  openForm({title:isNew?'Program baharu':'Sunting program',values:p,
+  openForm({title:isNew?'Program baharu':'Sunting program',values:Object.assign({},p,mvals(p)),
    fields:[{k:'nama',l:'Nama program',req:1,full:1},{k:'unit',l:'Unit',t:'select',o:UNITS.map(function(u){return [u,u]})},{k:'status',l:'Status',t:'select',o:Object.keys(ST).map(function(k){return [k,ST[k]]})},
     {k:'tarikh',l:'Tarikh mula',t:'date',req:1},{k:'tarikhTamat',l:'Tarikh tamat (jika lebih sehari)',t:'date'},{k:'masaMula',l:'Masa mula',t:'time'},{k:'masaTamat',l:'Masa tamat',t:'time'},
-    {k:'tempat',l:'Tempat',full:1},{k:'pic',l:'PIC program',list:'gurulist'},{k:'murid',l:'Bilangan murid',t:'number'},{k:'guru',l:'Bilangan guru',t:'number'},{k:'catatan',l:'Catatan',t:'textarea',full:1}],
+    {k:'tempat',l:'Tempat',full:1},{k:'pic',l:'PIC program',list:'gurulist'},{k:'m0',l:'Murid Tahun 1',t:'number'},{k:'m1',l:'Murid Tahun 2',t:'number'},{k:'m2',l:'Murid Tahun 3',t:'number'},{k:'m3',l:'Murid Tahun 4',t:'number'},{k:'m4',l:'Murid Tahun 5',t:'number'},{k:'m5',l:'Murid Tahun 6',t:'number'},{k:'guru',l:'Bilangan guru',t:'number'},{k:'catatan',l:'Catatan',t:'textarea',full:1}],
    extra:'<datalist id="gurulist">'+guruNames().map(function(n){return '<option value="'+esc(n)+'">'}).join('')+'</datalist>',
    onDelete:isNew?null:function(){del('programs',p.id).then(function(){closeModal();fixSel();toast('Program dipadam')})},
    onSave:function(v){
      if(v.tarikhTamat&&v.tarikhTamat<v.tarikh){toast('Tarikh tamat mesti selepas tarikh mula');return}
      var cl=clashes(Object.assign({},v,{id:p.id||''}));
      if(cl.length&&!window.confirm('Perhatian:\n'+cl.slice(0,4).map(function(c){return '• '+(c.t==='cuti'?'Bertindih dengan '+c.nama+' ('+c.tarikh+')':'Bertindih dengan program "'+c.nama+'" ('+c.sebab+')')}).join('\n')+'\n\nTeruskan menyimpan?'))return;
-     var data=Object.assign({},p.id?strip(p):{dok:{}},v,{murid:+v.murid||0,guru:+v.guru||0});
+     var mt=[0,1,2,3,4,5].map(function(i){return Math.max(0,Math.round(+v['m'+i]||0))});
+     [0,1,2,3,4,5].forEach(function(i){delete v['m'+i]});
+     var legacy=!mtOf(p)&&(+p.murid||0)>0&&sumA(mt)===0;
+     var data=Object.assign({},p.id?strip(p):{dok:{}},v,{guru:+v.guru||0});
+     if(legacy){data.murid=+p.murid||0}else{data.dok=Object.assign({},p.dok||{},{mt:mt});data.murid=sumA(mt)}
      var id=p.id||newId('p');
      put('programs',id,data).then(function(){S.sel=id;closeModal();toast('Program disimpan')});
    }});
 }
 function guruForm(g){
   g=g||{};var isNew=!g.id;
-  openForm({title:isNew?'Tambah warga kokum':'Sunting warga kokum',values:g,narrow:1,
-   fields:[{k:'nama',l:'Nama',req:1,full:1},{k:'jawatan',l:'Jawatan',full:1},{k:'unit',l:'Unit',full:1,t:'select',o:[['','Semua unit']].concat(UNITS.map(function(u){return [u,u]}))}],
+  openForm({title:isNew?'Tambah warga kokum':'Sunting warga kokum',values:g,narrow:1,extra:'<datalist id="jawlist">'+JAWATAN.map(function(j){return '<option value="'+esc(j)+'">'}).join('')+'</datalist>',
+   fields:[{k:'nama',l:'Nama',req:1,full:1},{k:'jawatan',l:'Jawatan',full:1,list:'jawlist'},{k:'unit',l:'Unit',full:1,t:'select',o:[['','Semua unit']].concat(UNITS.map(function(u){return [u,u]}))}],
    onDelete:isNew?null:function(){del('guru',g.id).then(function(){closeModal();toast('Dipadam')})},
    onSave:function(v){put('guru',g.id||newId('g'),v).then(function(){closeModal();toast('Disimpan')})}});
 }
@@ -1123,6 +1166,7 @@ document.addEventListener('click',function(e){
   else if(a==='newguru')guruForm();
   else if(a==='editguru')guruForm(S.guru.filter(function(g){return g.id===id})[0]);
   else if(a==='seed')seed();
+  else if(a==='addpic')guruForm({nama:t.dataset.n});
   else if(a==='close')closeModal();
   else if(a==='formdel'){if(S.form&&S.form.onDelete)S.form.onDelete()}
   else if(a==='filter'){S.filter=t.dataset.v;render()}
@@ -1144,7 +1188,6 @@ document.addEventListener('click',function(e){
   else if(a==='setstatus'&&p){put('programs',id,Object.assign(strip(p),{status:t.dataset.v})).then(function(){toast('Status dikemas kini');refreshDetail(id)})}
   else if(a==='calview'){S.calView=t.dataset.v;render()}
   else if(a==='newday'){progForm({status:'perancangan',unit:UNITS[0],murid:0,guru:0,tarikh:t.dataset.d,tarikhTamat:'',masaMula:'08:00',masaTamat:'12:00'})}
-  else if(a==='ics')exportIcs();
   else if(a==='backup')backup();
   else if(a==='cutimgr')cutiModal();
   else if(a==='delcuti'){saveCuti(cutiUser().filter(function(c){return c.id!==id})).then(function(){cutiModal();toast('Dipadam')})}
@@ -1168,7 +1211,6 @@ document.addEventListener('submit',function(e){
     new FormData(f).forEach(function(x,k){v[k]=typeof x==='string'?x.trim():x});
     if(v.tamat&&v.tamat<v.mula){toast('Tarikh tamat mesti selepas tarikh mula');return}
     saveCuti(cutiUser().concat([{id:newId('c'),nama:v.nama,mula:v.mula,tamat:v.tamat||''}])).then(function(){cutiModal();toast('Ditambah')})}
-  else if(f.id==='yearForm'){var arr=[0,1,2,3,4,5].map(function(i){return +f.elements['y'+i].value||0});put('config','main',Object.assign({},S.config,{penyertaan:arr})).then(function(){toast('Penyertaan disimpan')})}
   else if(f.id==='cfgForm'){new FormData(f).forEach(function(x,k){v[k]=typeof x==='string'?x.trim():x});v.tahun=+v.tahun||S.config.tahun;put('config','main',Object.assign({},S.config,v)).then(function(){toast('Tetapan disimpan')})}
 });
 $('#q').addEventListener('input',function(e){S.q=e.target.value;if(S.page!=='program'){S.page='program';render()}else{render()}});
