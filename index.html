@@ -377,6 +377,16 @@ tr:last-child td{border-bottom:0}
 .unk .btn{padding:6px 11px;font-size:12.5px}
 .mtab td,.mtab th{white-space:nowrap}
 .mtab td.wrap{white-space:normal;min-width:160px}
+
+/* ---------- Fasa 4: Program dan Dokumen ---------- */
+.chkrow{display:flex;gap:6px;align-items:stretch}
+.chkrow .chk{flex:1;min-width:0}
+.chkrow .lampir{flex:none;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);border-radius:10px;padding:0 10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.chkrow .lampir:hover{background:var(--surface)}
+.chkrow .lampir svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chk .cnt{margin-left:auto;flex:none;font-size:11px;font-weight:700;color:var(--green-ink,var(--green));background:color-mix(in srgb,var(--green) 16%,var(--surface));border-radius:999px;padding:1px 8px}
+.chk[aria-pressed="true"] .cnt{text-decoration:none}
+.filters select.inline{width:auto;max-width:100%}
 </style>
 </head>
 <body>
@@ -678,6 +688,7 @@ function uploadFiles(files,jenis){
     }
     job.then(function(body){return api(body)}).then(chk).then(function(r){
       var q=byId(id);if(q)q.fail=r.fail;okc++;render();refreshDetail(id);
+      var key=S.upKey;if(q&&key&&!(q.dok||{})[key]){var d2=Object.assign({},q.dok||{});d2[key]=true;put('programs',id,Object.assign(strip(q),{dok:d2}))}
     }).catch(function(e){
       toast('Gagal memuat naik '+tag+(e&&e.message&&e.message!=='ralat'?' ('+e.message+')':''));
       return new Promise(function(ok){setTimeout(ok,1800)});
@@ -770,7 +781,7 @@ function detail(p){
    row(NAVICON.warga,(+p.murid||0)+' orang murid<br>'+(+p.guru||0)+' orang guru')+
    (p.catatan?row('<path d="M6 3h8l5 5v13H6zM14 3v5h5M9 13h7M9 17h7"/>','Catatan','')+'':'')+'</div>'+
    (p.catatan?'<div class="note">'+esc(p.catatan)+'</div>':'')+
-   suggestNote(p)+attach(p)+'<div class="btns"><button class="btn pri" data-act="edit" data-id="'+esc(p.id)+'">'+svg('<path d="M4 20h4L19 9l-4-4L4 16z"/>')+'Edit</button>'+
+   suggestNote(p)+attach(p)+'<div class="btns"><button class="btn pri" data-act="edit" data-id="'+esc(p.id)+'">'+svg('<path d="M4 20h4L19 9l-4-4L4 16z"/>')+'Edit</button>'+'<button class="btn" data-act="copyprog" data-id="'+esc(p.id)+'">'+svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>')+'Salin</button>'+
    '<button class="btn" data-act="toggledone" data-id="'+esc(p.id)+'">'+svg('<path d="m5 12 5 5 9-10"/>')+(done?'Buka semula':'Tandakan selesai')+'</button>'+
    '<button class="btn" data-act="docs" data-id="'+esc(p.id)+'">'+svg('<path d="M6 3h8l5 5v13H6zM14 3v5h5"/>')+'Dokumen</button>'+(p.tarikh?'<a class="btn" target="_blank" rel="noopener" href="'+esc(gcalUrl(p))+'">'+svg('<path d="M4 5h16v16H4zM4 10h16M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/>')+'Google Calendar</a>':'')+'</div></div></div>';
 }
@@ -809,16 +820,19 @@ function vUtama(){
 }
 function vProgram(){
   var q=S.q.trim().toLowerCase();
-  var list=sorted(S.programs).filter(function(p){
+  var base=q?S.programs:yearProgs();
+  var list=sorted(base).filter(function(p){
     if(S.filter!=='semua'&&p.status!==S.filter)return false;
     if(S.unit!=='semua'&&p.unit!==S.unit)return false;
+    if(S.bulan&&S.bulan!=='semua'&&String(pd(p.tarikh).m)!==String(S.bulan))return false;
     return !q||[p.nama,p.unit,p.tempat,p.pic,p.catatan].join(' ').toLowerCase().indexOf(q)>=0;
   });
   var chips=[['semua','Semua']].concat(Object.keys(ST).map(function(k){return [k,ST[k]]}));
-  return '<div class="pagehead"><div><h1>Program</h1><p>'+S.programs.length+' program kokurikulum direkodkan</p></div><button class="btn pri" data-act="newprog">'+svg('<path d="M12 5v14M5 12h14"/>')+'Program baharu</button></div>'+
+  return '<div class="pagehead"><div><h1>Program</h1><p>'+(q?list.length+' program sepadan dengan carian (semua tahun)':base.length+' program kokurikulum tahun '+esc(curYear()))+'</p></div><button class="btn pri" data-act="newprog">'+svg('<path d="M12 5v14M5 12h14"/>')+'Program baharu</button></div>'+
    '<div class="filters">'+chips.map(function(c){return '<button class="fchip" data-act="filter" data-v="'+c[0]+'" aria-pressed="'+(S.filter===c[0])+'">'+esc(c[1])+'</button>'}).join('')+
-   '<select class="inline" id="unitSel" aria-label="Tapis unit"><option value="semua">Semua unit</option>'+UNITS.map(function(u){return '<option'+(S.unit===u?' selected':'')+'>'+esc(u)+'</option>'}).join('')+'</select></div>'+
-   (list.length?'<div class="grid3">'+list.map(card).join('')+'</div>':(S.programs.length?'<div class="card empty"><h3>Tiada program sepadan</h3><p>Cuba tukar penapis atau kata carian.</p></div>':emptyProgs()));
+   '<select class="inline" id="unitSel" aria-label="Tapis unit"><option value="semua">Semua unit</option>'+UNITS.map(function(u){return '<option'+(S.unit===u?' selected':'')+'>'+esc(u)+'</option>'}).join('')+'</select>'+
+   '<select class="inline" id="bulanSel" aria-label="Tapis bulan"><option value="semua">Semua bulan</option>'+MONF.map(function(m,i){return '<option value="'+(i+1)+'"'+(String(S.bulan)===String(i+1)?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></div>'+
+   (list.length?'<div class="grid3">'+list.map(card).join('')+'</div>':(base.length?'<div class="card empty"><h3>Tiada program sepadan</h3><p>Cuba tukar penapis atau kata carian.</p></div>':emptyProgs()));
 }
 function vWarga(){
   var rows=S.guru.slice().sort(function(a,b){return a.nama.localeCompare(b.nama)});
@@ -1065,12 +1079,21 @@ function vKalendar(){
    '<button class="fchip" data-act="calview" data-v="grid" aria-pressed="'+(view==='grid')+'">Grid</button><button class="fchip" data-act="calview" data-v="agenda" aria-pressed="'+(view==='agenda')+'">Agenda</button>'+
    '<button class="btn" data-act="cutimgr">Cuti &amp; acara</button><button class="btn pri" data-act="newprog">+ Program</button></div></div>'+body;
 }
+function docEv(p,k){
+  var L=failOf(p);
+  if(k==='gb')return L.filter(function(f){return f.jenis==='gambar'}).length;
+  if(k==='kk')return L.filter(function(f){return f.jenis==='pdf'&&f.label==='Kertas Kerja'}).length;
+  if(k==='lp')return L.filter(function(f){return f.jenis==='pdf'&&(f.label==='Laporan'||f.label==='OPR')}).length;
+  return 0;
+}
+var DOCLBL={kk:'Kertas Kerja',kb:'Lain-lain',hd:'Lain-lain',lp:'Laporan'};
 function vDokumen(){
-  var list=sorted(S.programs);
-  return '<div class="pagehead"><div><h1>Dokumen</h1><p>Semak kelengkapan dokumen setiap program. Klik untuk menanda siap.</p></div></div>'+
+  var list=sorted(yearProgs());
+  return '<div class="pagehead"><div><h1>Dokumen</h1><p>Semak kelengkapan dokumen setiap program tahun '+esc(curYear())+'. Klik untuk menanda siap, atau tekan Lampir untuk muat naik failnya terus.</p></div></div>'+
    (list.length?'<div class="docgrid">'+list.map(function(p){var d=p.dok||{},n=DOCS.filter(function(x){return d[x[0]]}).length;
     return '<div class="card" id="doc-'+esc(p.id)+'"><div class="sechead" style="margin-bottom:8px"><div><h3 style="margin:0">'+esc(p.nama)+'</h3><small style="color:var(--muted)">'+esc(range(p))+'</small></div><span class="pill st-'+p.status+'">'+n+'/'+DOCS.length+'</span></div><div class="bar" style="margin-bottom:10px"><i style="width:'+(n*100/DOCS.length)+'%"></i></div><div class="checks">'+
-    DOCS.map(function(x){return '<button class="chk" data-act="doc" data-id="'+esc(p.id)+'" data-k="'+x[0]+'" aria-pressed="'+!!d[x[0]]+'"><i></i><span>'+x[1]+'</span></button>'}).join('')+'</div>'+attLine(p)+'</div>'}).join('')+'</div>':emptyProgs());
+    DOCS.map(function(x){var c=docEv(p,x[0]);return '<div class="chkrow"><button class="chk" data-act="doc" data-id="'+esc(p.id)+'" data-k="'+x[0]+'" aria-pressed="'+!!d[x[0]]+'"><i></i><span>'+x[1]+'</span>'+(c?'<em class="cnt" style="font-style:normal" title="Fail dilampirkan">'+c+' fail</em>':'')+'</button>'+
+      (hasApi()?'<button class="lampir" data-act="lampir" data-id="'+esc(p.id)+'" data-k="'+x[0]+'" aria-label="Lampir fail untuk '+esc(x[1])+'">'+svg('<path d="M12 16V5M7 9l5-5 5 5M5 20h14"/>')+'Lampir</button>':'')+'</div>'}).join('')+'</div>'+attLine(p)+'</div>'}).join('')+'</div>':(S.programs.length?'<div class="card empty"><h3>Tiada program tahun '+esc(curYear())+'</h3><p>Tukar tahun paparan di bahagian atas untuk melihat dokumen tahun lain.</p></div>':emptyProgs()));
 }
 function vLaporan(){
   var P=yearProgs(),rows=UNITS.map(function(u){var l=P.filter(function(p){return p.unit===u});return {u:u,n:l.length,s:l.filter(function(p){return p.status==='selesai'}).length,m:l.reduce(function(a,p){return a+(+p.murid||0)},0),g:l.reduce(function(a,p){return a+(+p.guru||0)},0)}});
@@ -1167,6 +1190,7 @@ document.addEventListener('click',function(e){
   else if(a==='editguru')guruForm(S.guru.filter(function(g){return g.id===id})[0]);
   else if(a==='seed')seed();
   else if(a==='addpic')guruForm({nama:t.dataset.n});
+  else if(a==='copyprog'&&p){closeModal();var cp=Object.assign({},strip(p),{nama:p.nama+' (salinan)',tarikh:'',tarikhTamat:'',status:'perancangan',dok:{},fail:[]});var mt0=mtOf(p);if(mt0)cp.dok={mt:mt0};progForm(cp);toast('Isi tarikh baharu untuk program ini')}
   else if(a==='close')closeModal();
   else if(a==='formdel'){if(S.form&&S.form.onDelete)S.form.onDelete()}
   else if(a==='filter'){S.filter=t.dataset.v;render()}
@@ -1179,8 +1203,9 @@ document.addEventListener('click',function(e){
   else if(a==='reload')load();
   else if(a==='kod')askKod(true);
   else if(a==='csv')csv();
-  else if(a==='addimg'){S.upId=id;var ii=$('#upImg');ii.value='';ii.click()}
-  else if(a==='addpdf'){S.upId=id;S.upLabel=S.pdfJenis||($('#pdfJenis')||{}).value||'OPR';var pi=$('#upPdf');pi.value='';pi.click()}
+  else if(a==='addimg'){S.upKey=null;S.upId=id;var ii=$('#upImg');ii.value='';ii.click()}
+  else if(a==='addpdf'){S.upKey=null;S.upId=id;S.upLabel=S.pdfJenis||($('#pdfJenis')||{}).value||'OPR';var pi=$('#upPdf');pi.value='';pi.click()}
+  else if(a==='lampir'&&p){var kk=t.dataset.k;S.upKey=kk;S.upId=id;if(kk==='gb'){var gi=$('#upImg');gi.value='';gi.click()}else{S.upLabel=DOCLBL[kk]||'Lain-lain';var gp=$('#upPdf');gp.value='';gp.click()}}
   else if(a==='viewimg'&&p)viewImg(p,t.dataset.eid);
   else if(a==='openpdf'&&p)openPdf(p,t.dataset.eid);
   else if(a==='delfile'&&p)delFile(p,t.dataset.eid);
@@ -1198,6 +1223,7 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('change',function(e){
   if(e.target.id==='unitSel'){S.unit=e.target.value;render()}
+  else if(e.target.id==='bulanSel'){S.bulan=e.target.value;render()}
   else if(e.target.id==='pdfJenis'){S.pdfJenis=e.target.value}
   else if(e.target.id==='yearSel'){var yv=+e.target.value,nw=new Date();S.year=yv;try{localStorage.setItem('kokum.tahun',String(yv))}catch(x){}S.cal=new Date(yv,yv===nw.getFullYear()?nw.getMonth():0,1);render()}
   else if(e.target.id==='upImg'){if(e.target.files&&e.target.files.length)uploadFiles(e.target.files,'gambar')}
