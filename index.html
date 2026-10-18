@@ -387,6 +387,26 @@ tr:last-child td{border-bottom:0}
 .chk .cnt{margin-left:auto;flex:none;font-size:11px;font-weight:700;color:var(--green-ink,var(--green));background:color-mix(in srgb,var(--green) 16%,var(--surface));border-radius:999px;padding:1px 8px}
 .chk[aria-pressed="true"] .cnt{text-decoration:none}
 .filters select.inline{width:auto;max-width:100%}
+
+/* ---------- Fasa 5: PAJSK ---------- */
+.pagehead .btns{display:flex;gap:8px;flex-wrap:wrap}
+.pjname{background:none;border:0;padding:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.pjname:hover{color:var(--violet-ink,var(--violet))}
+.miss{color:var(--amber-ink,#9a6700);font-size:12px;font-weight:600}
+.pjtab td.wrap{min-width:150px}
+.pjsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:14px}
+.pjsum .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;margin-top:10px;font-size:13px}
+.pjsum .row span{overflow-wrap:anywhere}
+.pjsum .row .bar{grid-column:1/-1}
+.pjrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.pjrow:last-child{border-bottom:0}
+.pjrow small{display:block;color:var(--muted);font-size:12px}
+.pjrow .btn{padding:5px 10px;font-size:12px;flex:none}
+.pjrow>div{min-width:0;overflow-wrap:anywhere}
+.pjh{margin:16px 0 4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.pjb{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:700;background:color-mix(in srgb,var(--blue) 14%,var(--surface));white-space:nowrap}
+.pjsearch{flex:1 1 180px;min-width:150px;max-width:300px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px}
+.pjsearch:focus{outline:2px solid color-mix(in srgb,var(--violet) 45%,transparent);outline-offset:1px}
 </style>
 </head>
 <body>
@@ -452,8 +472,9 @@ var NAVICON={
  kalendar:'<path d="M4 5h16v16H4zM4 10h16M9 10v11M15 10v11"/>',
  dokumen:'<path d="M6 3h8l5 5v13H6zM14 3v5h5M9 13h7M9 17h7"/>',
  laporan:'<path d="M5 20V10M12 20V4M19 20v-7"/>',
+ pajsk:'<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5"/>',
  tetapan:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-var NAV=[['utama','Papan Utama'],['program','Program'],['warga','Warga Kokum'],['murid','Murid & Penyertaan'],['kalendar','Kalendar'],['dokumen','Dokumen'],['laporan','Laporan'],['tetapan','Tetapan']];
+var NAV=[['utama','Papan Utama'],['program','Program'],['warga','Warga Kokum'],['murid','Murid & Penyertaan'],['pajsk','PAJSK'],['kalendar','Kalendar'],['dokumen','Dokumen'],['laporan','Laporan'],['tetapan','Tetapan']];
 
 var SAMPLE={
  programs:[
@@ -474,6 +495,7 @@ var S={page:'utama',programs:JSON.parse(JSON.stringify(SAMPLE.programs)),guru:JS
   config:JSON.parse(JSON.stringify(SAMPLE.config)),db:null,loaded:{p:true,g:true,c:true},sel:null,q:'',filter:'semua',unit:'semua',
   cal:new Date(),dl:null,form:null};
 S.cal=new Date(S.cal.getFullYear(),S.cal.getMonth(),1);
+S.pajsk=[];S.pajskOff=false;S.pjT='semua';S.pjQ='';
 
 function $(s){return document.querySelector(s)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -520,13 +542,13 @@ function strip(o){var c=Object.assign({},o);delete c.id;return c}
 function newId(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
 function put(coll,id,data){
   if(coll==='config'){S.config=data}
-  else{var arr=coll==='programs'?S.programs:S.guru,o=Object.assign({id:id},data),i=arr.findIndex(function(x){return x.id===id});if(i<0)arr.push(o);else arr[i]=o}
+  else{var arr=coll==='programs'?S.programs:coll==='pajsk'?S.pajsk:S.guru,o=Object.assign({id:id},data),i=arr.findIndex(function(x){return x.id===id});if(i<0)arr.push(o);else arr[i]=o}
   render();
   if(!hasApi())return Promise.resolve();
   return api({action:coll==='config'?'config':'save',sheet:coll,id:id,data:data}).then(chk).catch(function(e){persistErr();load(true);throw e});
 }
 function del(coll,id){
-  var key=coll==='programs'?'programs':'guru';
+  var key=coll==='programs'?'programs':coll==='pajsk'?'pajsk':'guru';
   S[key]=S[key].filter(function(x){return x.id!==id});render();
   if(!hasApi())return Promise.resolve();
   return api({action:'delete',sheet:coll,id:id}).then(chk).catch(function(e){persistErr();load(true);throw e});
@@ -542,7 +564,7 @@ function load(quiet){
   if(!quiet){S.err=null;S.loaded={p:false,g:false,c:false};render()}
   api().then(function(r){
     if(!r||!r.ok){if(r&&r.error==='kod'){askKod();return}throw new Error((r&&r.error)||'ralat')}
-    S.programs=r.programs||[];S.guru=r.guru||[];S.config=Object.assign({},SAMPLE.config,r.config||{});
+    S.programs=r.programs||[];S.guru=r.guru||[];S.pajsk=r.pajsk||[];S.pajskOff=(r.pajsk===undefined);S.config=Object.assign({},SAMPLE.config,r.config||{});
     S.loaded={p:true,g:true,c:true};S.err=null;fixSel();render();
   }).catch(function(e){
     if(!quiet){S.err='Tidak dapat berhubung dengan Google Sheets. Semak URL Web App dan sambungan internet.';S.loaded={p:true,g:true,c:true};render()}
@@ -556,7 +578,7 @@ function askKod(cancel){
 function fixSel(){if(!S.sel||!byId(S.sel)){var l=sorted(S.programs);S.sel=l.length?l[0].id:null}}
 function boot(){
   if(!hasApi())return;
-  S.programs=[];S.guru=[];S.config=Object.assign({},SAMPLE.config,{sekolah:'',pengguna:'',jawatan:''});S.loaded={p:false,g:false,c:false};
+  S.programs=[];S.guru=[];S.pajsk=[];S.config=Object.assign({},SAMPLE.config,{sekolah:'',pengguna:'',jawatan:''});S.loaded={p:false,g:false,c:false};
   chrome();render();
   if(!kod())askKod();else load();
   setInterval(function(){if(!document.hidden&&$('#ovl').hidden&&kod()&&!S.upBusy)load(true)},60000);
@@ -577,6 +599,7 @@ function chrome(){
   var b=$('#bellN');b.textContent=n;b.hidden=!n;
   var ys=$('#yearSel');
   if(ys){var set={},ny=new Date().getFullYear();S.programs.forEach(function(p){var y=pd(p.tarikh).y;if(y>=2000&&y<=2100)set[y]=1});
+    (S.pajsk||[]).forEach(function(m){Object.keys(m.rekod||{}).forEach(function(k){if(+k>=2000&&+k<=2100)set[+k]=1})});
     [+c.tahun,ny,ny+1,curYear()].forEach(function(y){if(y>=2000&&y<=2100)set[y]=1});
     ys.innerHTML=Object.keys(set).map(Number).sort().map(function(y){return '<option value="'+y+'"'+(y===curYear()?' selected':'')+'>Tahun '+y+'</option>'}).join('')}
 }
@@ -850,6 +873,186 @@ function vWarga(){
      var L=picProgs(g),nm=L.slice(0,2).map(function(p){return esc(p.nama)}).join(', ')+(L.length>2?' dan '+(L.length-2)+' lagi':'');
      return '<tr><td><b>'+esc(g.nama)+'</b></td><td>'+esc(g.jawatan||'-')+'</td><td>'+esc(g.unit||'Semua unit')+'</td><td class="wrap">'+(L.length?'<b>'+L.length+'</b><span class="mini">'+nm+'</span>':'<span style="color:var(--muted)">Belum ada</span>')+'</td><td class="num"><button class="btn" data-act="editguru" data-id="'+esc(g.id)+'">Sunting</button></td></tr>'}).join('')+'</tbody></table></div>':'');
 }
+
+/* ---------- Fasa 5: PAJSK (murid Tahun 4 hingga 6) ---------- */
+var PJ_PERINGKAT=['Sekolah','Zon/Daerah','Bahagian','Negeri','Kebangsaan','Antarabangsa'];
+var PJ_CAPAI=['Johan','Naib Johan','Tempat Ketiga','Tempat Keempat','Emas','Perak','Gangsa','Penyertaan'];
+var PJ_JAWATAN=['Pengerusi','Naib Pengerusi','Ketua','Penolong Ketua','Setiausaha','Penolong Setiausaha','Bendahari','Kapten','Naib Kapten','AJK','Ahli'];
+var PJ_DEF={
+ uni:['Pengakap','Pandu Puteri','Kadet Polis','Kadet Bomba dan Penyelamat','Kadet Remaja Sekolah','Persatuan Bulan Sabit Merah','Puteri Islam','St. John Ambulance','Pengawas'],
+ klb:['Kelab Bahasa Melayu','Persatuan Bahasa Inggeris','Persatuan Bahasa Arab','Kelab Sains dan Matematik','Persatuan Agama Islam','Kelab Seni','Kelab Komputer','Kelab Pencinta Alam'],
+ spt:['Bola Sepak','Bola Jaring','Olahraga','Badminton','Sepak Takraw','Bola Tampar','Bola Baling','Catur','Renang']};
+var PJ_KAT=[['uni','Beruniform'],['klb','Kelab'],['spt','Sukan'],['lain','Lain-lain']];
+var PJ_FLD={uni:['uni','jUni','Unit beruniform'],klb:['klb','jKlb','Kelab / persatuan'],spt:['spt','jSpt','Sukan / permainan']};
+function pjLevel(m,y){return y-(+m.mula||0)+1}
+function pjBy(id){return S.pajsk.filter(function(m){return m.id===id})[0]}
+function pjRec(m,y){var r=m&&m.rekod&&m.rekod[y];return r&&typeof r==='object'?r:{}}
+function pjCap(r){return Array.isArray(r.capai)?r.capai:[]}
+function pjRank(p){var i=PJ_PERINGKAT.indexOf(p);return i<0?-1:i}
+function pjLengkap(r){return !!(r.uni&&r.klb&&r.spt)}
+function pjList(){
+  var y=curYear();
+  return S.pajsk.filter(function(m){var l=pjLevel(m,y);return +m.mula>0&&l>=4&&l<=6}).sort(function(a,b){
+    var d=pjLevel(a,y)-pjLevel(b,y);if(d)return d;
+    var k=String(pjRec(a,y).kelas||'').localeCompare(String(pjRec(b,y).kelas||''));if(k)return k;
+    return String(a.nama).localeCompare(String(b.nama))});
+}
+function pjTop(r){var t=-1;pjCap(r).forEach(function(c){t=Math.max(t,pjRank(c.peringkat))});return t}
+function pjOpts(kat){
+  var seen={},out=[];
+  function add(v){v=String(v||'').trim();var k=v.toLowerCase();if(v&&!seen[k]){seen[k]=1;out.push(v)}}
+  S.pajsk.forEach(function(m){Object.keys(m.rekod||{}).forEach(function(y){add(pjRec(m,y)[kat])})});
+  (PJ_DEF[kat]||[]).forEach(add);
+  return out;
+}
+function pjDL(id,list){return '<datalist id="'+id+'">'+list.map(function(n){return '<option value="'+esc(n)+'">'}).join('')+'</datalist>'}
+function pjGroup(list,kat,y){
+  var g={},order=[];
+  list.forEach(function(m){var n=String(pjRec(m,y)[kat]||'').trim();if(!n)return;var k=n.toLowerCase();if(!g[k]){g[k]={n:n,c:0};order.push(k)}g[k].c++});
+  return order.map(function(k){return g[k]}).sort(function(a,b){return b.c-a.c||a.n.localeCompare(b.n)});
+}
+function dlCsv(rows,name){
+  var s2='﻿'+rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);return '"'+c.replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
+  var bl=new Blob([s2],{type:'text/csv;charset=utf-8'}),an=document.createElement('a');an.href=URL.createObjectURL(bl);an.download=name;document.body.appendChild(an);an.click();
+  setTimeout(function(){URL.revokeObjectURL(an.href);an.remove()},500);toast('Fail dimuat turun');
+}
+function pjCsv(jenis){
+  var y=curYear(),L=pjList();
+  if(jenis==='murid'){
+    dlCsv([['Nama','Tahun','Kelas','Unit beruniform','Jawatan','Kelab / persatuan','Jawatan','Sukan / permainan','Jawatan','Bil. pencapaian','Pencapaian']].concat(L.map(function(m){
+      var r=pjRec(m,y);return [m.nama,pjLevel(m,y),r.kelas||'',r.uni||'',r.jUni||'',r.klb||'',r.jKlb||'',r.spt||'',r.jSpt||'',pjCap(r).length,pjCap(r).map(function(c){return c.nama+' ('+c.peringkat+', '+c.hasil+')'}).join('; ')]})),'pajsk-murid-'+y+'.csv');
+  }else{
+    var rows=[['Nama','Tahun','Kelas','Program / pertandingan','Kategori','Peringkat','Pencapaian']];
+    L.forEach(function(m){var r=pjRec(m,y);pjCap(r).forEach(function(c){rows.push([m.nama,pjLevel(m,y),r.kelas||'',c.nama,(PJ_KAT.filter(function(k){return k[0]===c.kat})[0]||['','Lain-lain'])[1],c.peringkat,c.hasil])})});
+    dlCsv(rows,'pajsk-pencapaian-'+y+'.csv');
+  }
+}
+function putMany(coll,rows){
+  rows.forEach(function(r){var o=Object.assign({id:r.id},r.data),i=S.pajsk.findIndex(function(x){return x.id===r.id});if(i<0)S.pajsk.push(o);else S.pajsk[i]=o});
+  render();
+  if(!hasApi())return Promise.resolve();
+  return api({action:'savemany',sheet:coll,rows:rows}).then(chk).catch(function(e){persistErr();load(true);throw e});
+}
+
+function vPajsk(){
+  var y=curYear();
+  var head='<div class="pagehead"><div><h1>PAJSK</h1><p>Penglibatan murid Tahun 4 hingga 6 dalam unit beruniform, kelab dan sukan, tahun '+esc(y)+'</p></div>'+
+   (S.pajskOff?'':'<div class="btns"><button class="btn" data-act="pjbulk">'+svg('<path d="M8 6h12M8 12h12M8 18h12M3 6h.01M3 12h.01M3 18h.01"/>')+'Tampal senarai</button><button class="btn pri" data-act="pjnew">'+svg('<path d="M12 5v14M5 12h14"/>')+'Murid baharu</button></div>')+'</div>';
+  if(S.pajskOff)return head+'<div class="card empty"><h3>Apps Script perlu dikemas kini</h3><p>Helaian PAJSK belum wujud kerana Code.gs versi lama masih digunakan. Tampal Code.gs versi baharu, simpan, kemudian Deploy &gt; Manage deployments &gt; Edit &gt; New version &gt; Deploy.</p></div>';
+  var all=pjList();
+  if(!all.length)return head+'<div class="card empty"><h3>Belum ada murid dalam PAJSK tahun '+esc(y)+'</h3><p>Tambah murid Tahun 4 hingga 6 satu demi satu, atau tampal senarai nama sekelas sekali gus. Kemudian isi unit beruniform, kelab, sukan dan pencapaian setiap murid.</p><div class="btns"><button class="btn pri" data-act="pjbulk">Tampal senarai murid</button><button class="btn" data-act="pjnew">Murid baharu</button></div></div>';
+  var q=S.pjQ.trim().toLowerCase(),lv=S.pjT;
+  var list=all.filter(function(m){
+    var r=pjRec(m,y);
+    if(lv==='4'||lv==='5'||lv==='6'){if(String(pjLevel(m,y))!==lv)return false}
+    else if(lv==='belum'){if(pjLengkap(r))return false}
+    if(q&&(m.nama+' '+(r.kelas||'')+' '+(r.uni||'')+' '+(r.klb||'')+' '+(r.spt||'')).toLowerCase().indexOf(q)<0)return false;
+    return true});
+  var cnt=[0,0,0,0,0,0,0],lengkap=0,jumC=0,tinggi=0;
+  all.forEach(function(m){var r=pjRec(m,y);cnt[pjLevel(m,y)]++;if(pjLengkap(r))lengkap++;jumC+=pjCap(r).length;pjCap(r).forEach(function(c){if(pjRank(c.peringkat)>=3)tinggi++})});
+  var stat=function(col,ci,ic,n,l,sub){return '<div class="stat" style="--c:var(--'+col+');--ci:var(--'+ci+')"><div class="ic">'+svg(ic)+'</div><div><b>'+n+'</b><span>'+l+'</span><small>'+sub+'</small></div></div>'};
+  var chips=[['semua','Semua'],['4','Tahun 4'],['5','Tahun 5'],['6','Tahun 6'],['belum','Belum lengkap']];
+  var cell=function(n,j){return n?'<b>'+esc(n)+'</b>'+(j?'<span class="mini">'+esc(j)+'</span>':''):'<span class="miss">Belum diisi</span>'};
+  return head+
+   '<section class="pstats">'+
+    stat('violet','violet-ink',NAVICON.warga,all.length,'Murid PAJSK','Tahun 4: '+cnt[4]+' · Tahun 5: '+cnt[5]+' · Tahun 6: '+cnt[6])+
+    stat('green','green-ink','<path d="m5 12 5 5 9-10"/>',lengkap+' / '+all.length,'Rekod lengkap','Ada unit beruniform, kelab dan sukan')+
+    stat('amber','amber-ink',NAVICON.pajsk,jumC,'Pencapaian direkod',tinggi+' peringkat negeri ke atas')+
+   '</section>'+
+   '<div class="filters">'+chips.map(function(c){return '<button class="fchip" data-act="pjfilter" data-v="'+c[0]+'" aria-pressed="'+(lv===c[0])+'">'+esc(c[1])+(c[0]==='belum'?' ('+(all.length-lengkap)+')':'')+'</button>'}).join('')+
+   '<input class="pjsearch" id="pjq" type="search" placeholder="Cari nama, kelas atau unit" aria-label="Cari murid PAJSK" value="'+esc(S.pjQ)+'"></div>'+
+   (list.length?'<div class="card tablewrap"><table class="mtab pjtab"><thead><tr><th>Nama</th><th>Tahun</th><th>Beruniform</th><th>Kelab</th><th>Sukan</th><th>Pencapaian</th></tr></thead><tbody>'+list.map(function(m){
+     var r=pjRec(m,y),top=pjTop(r);
+     return '<tr><td class="wrap"><button class="pjname" data-act="pjopen" data-id="'+esc(m.id)+'">'+esc(m.nama)+'</button></td><td class="wrap">Tahun '+pjLevel(m,y)+(r.kelas?'<span class="mini">'+esc(r.kelas)+'</span>':'')+'</td><td class="wrap">'+cell(r.uni,r.jUni)+'</td><td class="wrap">'+cell(r.klb,r.jKlb)+'</td><td class="wrap">'+cell(r.spt,r.jSpt)+'</td><td>'+(pjCap(r).length?'<b>'+pjCap(r).length+'</b>'+(top>=0?' <span class="pjb">'+esc(PJ_PERINGKAT[top])+'</span>':''):'<span style="color:var(--muted)">-</span>')+'</td></tr>'}).join('')+'</tbody></table></div>':
+    '<div class="card empty"><h3>Tiada murid sepadan</h3><p>Cuba tukar penapis atau kata carian.</p></div>')+
+   '<div class="pjsum">'+['uni','klb','spt'].map(function(k){
+     var G=pjGroup(all,k,y),mx=Math.max.apply(null,G.map(function(g){return g.c}).concat([1]));
+     return '<div class="card"><h3>'+esc(PJ_FLD[k][2])+'</h3>'+(G.length?G.map(function(g){return '<div class="row"><span>'+esc(g.n)+'</span><b>'+g.c+'</b><div class="bar"><i style="width:'+Math.round(g.c*100/mx)+'%"></i></div></div>'}).join(''):'<p style="color:var(--muted);font-size:13px;margin-top:8px">Belum ada murid dengan unit ini.</p>')+'</div>'}).join('')+'</div>'+
+   '<div class="btns" style="margin-top:16px"><button class="btn" data-act="pjcsv" data-k="murid">'+svg('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>')+'CSV murid</button><button class="btn" data-act="pjcsv" data-k="capai">'+svg('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>')+'CSV pencapaian</button></div>';
+}
+
+function pjExtra(){return pjDL('pjUni',pjOpts('uni'))+pjDL('pjKlb',pjOpts('klb'))+pjDL('pjSpt',pjOpts('spt'))+pjDL('pjJaw',PJ_JAWATAN)}
+
+function pjForm(m){
+  m=m||{};var isNew=!m.id,y=curYear(),r=pjRec(m,y),pre=false;
+  if(!isNew&&!r.uni&&!r.klb&&!r.spt){var pv=pjRec(m,y-1);if(pv.uni||pv.klb||pv.spt){r=Object.assign({},r,{uni:pv.uni,jUni:pv.jUni,klb:pv.klb,jKlb:pv.jKlb,spt:pv.spt,jSpt:pv.jSpt});pre=true}}
+  var lv=isNew?(['4','5','6'].indexOf(S.pjT)>=0?+S.pjT:4):pjLevel(m,y);
+  openForm({title:isNew?'Murid baharu':'Sunting maklumat murid',values:Object.assign({nama:m.nama||'',tahun:lv,kelas:r.kelas||''},r),
+   fields:[{k:'nama',l:'Nama murid',req:1,full:1},{k:'tahun',l:'Tahun (tahun '+y+')',t:'select',o:[[4,'Tahun 4'],[5,'Tahun 5'],[6,'Tahun 6']]},{k:'kelas',l:'Kelas'},
+    {k:'uni',l:'Unit beruniform',list:'pjUni'},{k:'jUni',l:'Jawatan dalam unit beruniform',list:'pjJaw'},
+    {k:'klb',l:'Kelab / persatuan',list:'pjKlb'},{k:'jKlb',l:'Jawatan dalam kelab',list:'pjJaw'},
+    {k:'spt',l:'Sukan / permainan',list:'pjSpt'},{k:'jSpt',l:'Jawatan dalam sukan',list:'pjJaw'}],
+   extra:pjExtra()+(pre?'<div class="note sugg" style="grid-column:1/-1">Unit dan jawatan diisi daripada tahun '+(y-1)+'. Semak dan ubah jika berbeza, kemudian simpan.</div>':''),
+   onDelete:isNew?null:function(){if(!window.confirm('Padam '+m.nama+' beserta semua rekod PAJSK pada semua tahun?'))return;del('pajsk',m.id).then(function(){closeModal();toast('Murid dipadam')})},
+   onSave:function(v){
+     var mula=y-(+v.tahun)+1;
+     if(isNew&&S.pajsk.some(function(x){return String(x.nama).trim().toLowerCase()===v.nama.toLowerCase()&&+x.mula===mula})&&!window.confirm('Murid bernama "'+v.nama+'" sudah ada pada tahun yang sama. Tambah juga?'))return;
+     var rekod=Object.assign({},m.rekod||{}),cur=Object.assign({},rekod[y]||{});
+     ['kelas','uni','jUni','klb','jKlb','spt','jSpt'].forEach(function(k){cur[k]=v[k]||''});
+     cur.capai=pjCap(rekod[y]||{});rekod[y]=cur;
+     var id=m.id||newId('m');
+     put('pajsk',id,{nama:v.nama,mula:mula,rekod:rekod}).then(function(){closeModal();toast('Disimpan');if(!isNew)pjDetail(id)});
+   }});
+}
+
+function pjDetail(id){
+  var m=pjBy(id);if(!m)return;var y=curYear(),r=pjRec(m,y),lv=pjLevel(m,y);
+  var cap=pjCap(r).slice().sort(function(a,b){return pjRank(b.peringkat)-pjRank(a.peringkat)});
+  var unit=['uni','klb','spt'].map(function(k){var f=PJ_FLD[k],n=r[f[0]],j=r[f[1]];return '<div class="pjrow"><div><small>'+esc(f[2])+'</small>'+(n?'<b>'+esc(n)+'</b>':'<span class="miss">Belum diisi</span>')+'</div><div style="text-align:right">'+(j?'<small>Jawatan</small><b>'+esc(j)+'</b>':'')+'</div></div>'}).join('');
+  var other=Object.keys(m.rekod||{}).filter(function(k){return +k!==y}).sort().reverse().map(function(k){var o=pjRec(m,k);return '<div class="pjrow"><div><b>'+esc(k)+'</b><small>'+esc([o.uni,o.klb,o.spt].filter(Boolean).join(' · ')||'Tiada unit direkod')+'</small></div><span>'+pjCap(o).length+' pencapaian</span></div>'}).join('');
+  openModal('<div class="mh"><div><h2>'+esc(m.nama)+'</h2><small style="color:var(--muted)">Tahun '+lv+(r.kelas?' · '+esc(r.kelas):'')+' · PAJSK '+esc(y)+'</small></div><button type="button" class="mx" data-act="close" aria-label="Tutup">×</button></div>'+
+   '<div class="mb"><div style="grid-column:1/-1">'+unit+
+   '<div class="pjh">Program dan pencapaian '+esc(y)+'</div>'+
+   (cap.length?cap.map(function(c){return '<div class="pjrow"><div><b>'+esc(c.nama)+'</b><small>'+esc((PJ_KAT.filter(function(k){return k[0]===c.kat})[0]||['','Lain-lain'])[1])+'</small></div><div style="text-align:right;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="pjb">'+esc(c.peringkat)+'</span><b>'+esc(c.hasil)+'</b><button class="btn" data-act="pjeditcap" data-id="'+esc(m.id)+'" data-c="'+esc(c.id)+'">Sunting</button></div></div>'}).join(''):'<p style="color:var(--muted);font-size:13px;padding:8px 0">Belum ada pencapaian direkod untuk tahun ini.</p>')+
+   (other?'<div class="pjh">Tahun lain</div>'+other:'')+'</div></div>'+
+   '<div class="mf"><button type="button" class="btn" data-act="close">Tutup</button><button type="button" class="btn" data-act="pjedit" data-id="'+esc(m.id)+'">Sunting maklumat</button><button type="button" class="btn pri" data-act="pjaddcap" data-id="'+esc(m.id)+'">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah pencapaian</button></div>');
+}
+
+function pjCapForm(m,c){
+  c=c||{};var isNew=!c.id,y=curYear();
+  var prg=yearProgs().map(function(p){return p.nama});
+  openForm({title:isNew?'Tambah pencapaian':'Sunting pencapaian',values:Object.assign({kat:'spt',peringkat:'Sekolah',hasil:'Penyertaan'},c),
+   fields:[{k:'nama',l:'Program / pertandingan',req:1,full:1,list:'pjPrg'},{k:'kat',l:'Kategori',t:'select',o:PJ_KAT.map(function(k){return [k[0],k[1]]})},
+    {k:'peringkat',l:'Peringkat',t:'select',o:PJ_PERINGKAT.map(function(p){return [p,p]})},{k:'hasil',l:'Pencapaian',req:1,full:1,list:'pjCapai'}],
+   extra:pjDL('pjPrg',prg)+pjDL('pjCapai',PJ_CAPAI),
+   onDelete:isNew?null:function(){savecap(m,function(L){return L.filter(function(x){return x.id!==c.id})},'Pencapaian dipadam')},
+   onSave:function(v){
+     var o={id:c.id||newId('c'),nama:v.nama,kat:v.kat,peringkat:v.peringkat,hasil:v.hasil};
+     savecap(m,function(L){var i=L.findIndex(function(x){return x.id===o.id});if(i<0)L.push(o);else L[i]=o;return L},'Pencapaian disimpan');
+   }});
+  function savecap(m,fn,msg){
+    var rekod=Object.assign({},m.rekod||{}),cur=Object.assign({},rekod[y]||{});
+    cur.capai=fn(pjCap(cur).slice());rekod[y]=cur;
+    put('pajsk',m.id,{nama:m.nama,mula:m.mula,rekod:rekod}).then(function(){toast(msg);pjDetail(m.id)});
+  }
+}
+
+function pjBulk(){
+  var y=curYear();
+  openForm({title:'Tampal senarai murid',values:{tahun:['4','5','6'].indexOf(S.pjT)>=0?+S.pjT:4,senarai:''},
+   fields:[{k:'tahun',l:'Semua murid dalam senarai ini ialah',t:'select',o:[[4,'Tahun 4'],[5,'Tahun 5'],[6,'Tahun 6']],full:1},
+    {k:'senarai',l:'Senarai murid (satu murid setiap baris; selepas nama boleh letak kelas, dipisahkan koma atau tab)',t:'textarea',rows:9,full:1,ph:'Ali bin Abu, 4 Bestari\nSiti binti Ahmad, 4 Bestari'}],
+   onSave:function(v){
+     var lv=+v.tahun,mula=y-lv+1,have={};
+     S.pajsk.forEach(function(x){if(+x.mula===mula)have[String(x.nama).trim().toLowerCase()]=1});
+     var rows=[],skip=0,seen={};
+     String(v.senarai||'').split(/\r?\n/).forEach(function(line){
+       var p=line.split(/\t|;|,/).map(function(x){return x.trim()}).filter(function(x,i){return x||i>0});
+       if(p.length>1&&/^\d+$/.test(p[0]))p.shift();
+       var nama=(p[0]||'').replace(/^\s*\d+\s*[\.\)\-]\s*/,'').trim(),kelas=(p[1]||'').trim();
+       if(!nama)return;
+       var k=nama.toLowerCase();
+       if(have[k]||seen[k]){skip++;return}
+       seen[k]=1;
+       var rk={};rk[y]={kelas:kelas,uni:'',jUni:'',klb:'',jKlb:'',spt:'',jSpt:'',capai:[]};
+       rows.push({id:newId('m')+rows.length,data:{nama:nama,mula:mula,rekod:rk}});
+     });
+     if(!rows.length){toast(skip?'Semua nama sudah ada dalam senarai':'Tiada nama dijumpai');return}
+     if(rows.length>300){toast('Maksimum 300 murid sekali gus. Pecahkan senarai.');return}
+     putMany('pajsk',rows).then(function(){closeModal();toast(rows.length+' murid ditambah'+(skip?', '+skip+' nama sedia ada dilangkau':''))});
+   }});
+}
+
 function vMurid(){
   var P=sorted(yearProgs()),PN=penyertaan(P),mx=Math.max.apply(null,PN.t.concat([0])),tp=PN.t.indexOf(mx);
   var avg=P.length?Math.round(PN.jum/P.length):0;
@@ -1032,7 +1235,7 @@ function galeri(){
 }
 function icsDT(iso,t){return iso.replace(/-/g,'')+(t?'T'+t.replace(':','')+'00':'')}
 function backup(){
-  var o={dieksport:new Date().toISOString(),sistem:'Kokum SmartTrax SKGG',programs:S.programs,guru:S.guru,config:S.config};
+  var o={dieksport:new Date().toISOString(),sistem:'Kokum SmartTrax SKGG',programs:S.programs,guru:S.guru,pajsk:S.pajsk,config:S.config};
   var bl=new Blob([JSON.stringify(o,null,1)],{type:'application/json'}),an=document.createElement('a');
   an.href=URL.createObjectURL(bl);an.download='sandaran-kokum-smarttrax-'+todayISO()+'.json';document.body.appendChild(an);an.click();
   setTimeout(function(){URL.revokeObjectURL(an.href);an.remove()},3000);toast('Sandaran dimuat turun');
@@ -1116,7 +1319,7 @@ function vTetapan(){
    '<p style="color:var(--muted);font-size:13px;margin-bottom:10px">Sandaran ialah salinan semua program, warga kokum dan tetapan dalam satu fail. Gambar dan PDF kekal selamat dalam Google Drive awak.</p>'+
    '<div class="btns"><button class="btn" data-act="backup">'+svg('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>')+'Muat turun sandaran data</button><button class="btn" data-act="kod">'+svg('<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>')+'Tukar kod akses pada peranti ini</button></div></div>';
 }
-var VIEWS={utama:vUtama,program:vProgram,warga:vWarga,murid:vMurid,kalendar:vKalendar,dokumen:vDokumen,laporan:vLaporan,tetapan:vTetapan};
+var VIEWS={utama:vUtama,program:vProgram,warga:vWarga,murid:vMurid,pajsk:vPajsk,kalendar:vKalendar,dokumen:vDokumen,laporan:vLaporan,tetapan:vTetapan};
 function render(){
   chrome();
   var ready=S.loaded.p&&S.loaded.g&&S.loaded.c;
@@ -1128,7 +1331,7 @@ function render(){
 function fld(f,v){
   var id='f_'+f.k,val=v==null?'':v,cls=f.full?' class="full"':'',ctl;
   if(f.t==='select')ctl='<select id="'+id+'" name="'+f.k+'">'+f.o.map(function(o){var ov=o[0],ol=o[1];return '<option value="'+esc(ov)+'"'+(String(val)===String(ov)?' selected':'')+'>'+esc(ol)+'</option>'}).join('')+'</select>';
-  else if(f.t==='textarea')ctl='<textarea id="'+id+'" name="'+f.k+'" rows="3">'+esc(val)+'</textarea>';
+  else if(f.t==='textarea')ctl='<textarea id="'+id+'" name="'+f.k+'" rows="'+(f.rows||3)+'"'+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+'>'+esc(val)+'</textarea>';
   else ctl='<input id="'+id+'" name="'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(val)+'"'+(f.req?' required':'')+(f.t==='number'?' min="0"':'')+(f.list?' list="'+f.list+'"':'')+'>';
   return '<label'+cls+' for="'+id+'">'+esc(f.l)+(f.req?' *':'')+ctl+'</label>';
 }
@@ -1189,6 +1392,14 @@ document.addEventListener('click',function(e){
   else if(a==='newguru')guruForm();
   else if(a==='editguru')guruForm(S.guru.filter(function(g){return g.id===id})[0]);
   else if(a==='seed')seed();
+  else if(a==='pjnew')pjForm();
+  else if(a==='pjbulk')pjBulk();
+  else if(a==='pjopen')pjDetail(id);
+  else if(a==='pjedit'){var pm=pjBy(id);if(pm){closeModal();pjForm(pm)}}
+  else if(a==='pjaddcap'){var pm2=pjBy(id);if(pm2){closeModal();pjCapForm(pm2)}}
+  else if(a==='pjeditcap'){var pm3=pjBy(id);if(pm3){var cc=pjCap(pjRec(pm3,curYear())).filter(function(x){return x.id===t.dataset.c})[0];if(cc){closeModal();pjCapForm(pm3,cc)}}}
+  else if(a==='pjfilter'){S.pjT=t.dataset.v;render()}
+  else if(a==='pjcsv')pjCsv(t.dataset.k);
   else if(a==='addpic')guruForm({nama:t.dataset.n});
   else if(a==='copyprog'&&p){closeModal();var cp=Object.assign({},strip(p),{nama:p.nama+' (salinan)',tarikh:'',tarikhTamat:'',status:'perancangan',dok:{},fail:[]});var mt0=mtOf(p);if(mt0)cp.dok={mt:mt0};progForm(cp);toast('Isi tarikh baharu untuk program ini')}
   else if(a==='close')closeModal();
@@ -1239,6 +1450,7 @@ document.addEventListener('submit',function(e){
     saveCuti(cutiUser().concat([{id:newId('c'),nama:v.nama,mula:v.mula,tamat:v.tamat||''}])).then(function(){cutiModal();toast('Ditambah')})}
   else if(f.id==='cfgForm'){new FormData(f).forEach(function(x,k){v[k]=typeof x==='string'?x.trim():x});v.tahun=+v.tahun||S.config.tahun;put('config','main',Object.assign({},S.config,v)).then(function(){toast('Tetapan disimpan')})}
 });
+document.addEventListener('input',function(e){if(e.target.id==='pjq'){S.pjQ=e.target.value;var pos=e.target.selectionStart;render();var n=$('#pjq');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}});
 $('#q').addEventListener('input',function(e){S.q=e.target.value;if(S.page!=='program'){S.page='program';render()}else{render()}});
 $('#bell').addEventListener('click',function(){S.page='kalendar';var n=new Date();S.cal=new Date(n.getFullYear(),n.getMonth(),1);render()});
 
