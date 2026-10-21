@@ -437,6 +437,37 @@ tr:last-child td{border-bottom:0}
 #printArea .ttd{display:flex;justify-content:space-between;gap:16pt;margin-top:46pt;font-size:10.5pt}
 #printArea .ttd div{flex:1;border-top:.75pt solid #000;padding-top:3pt;text-align:center}
 #printArea .pfoot{margin-top:16pt;font-size:9pt;color:#444}
+
+/* ---------- Fasa 7: gambar & peranan guru ---------- */
+.gav{width:var(--s,56px);height:var(--s,56px);border-radius:50%;object-fit:cover;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-size:calc(var(--s,56px)*.36);background:var(--bg,var(--violet));overflow:hidden;line-height:1}
+.gcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.gcard{display:flex;gap:13px;align-items:flex-start;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--surface);cursor:pointer;min-width:0;text-align:left}
+.gcard:hover,.gcard:focus-visible{border-color:color-mix(in srgb,var(--violet) 55%,var(--line));outline:none;box-shadow:0 4px 14px rgba(40,30,90,.08)}
+.gcard>div:last-child{min-width:0;flex:1}
+.gcard b{display:block;overflow-wrap:anywhere}
+.gcard .gsub{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.gtags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.gtag{--tc:var(--amber);font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 30%,transparent);overflow-wrap:anywhere}
+.gtag.uni{--tc:var(--violet)}.gtag.klb{--tc:var(--blue)}.gtag.spt{--tc:var(--green)}.gtag.lain{--tc:var(--amber)}
+.gcard .gmeta{font-size:12px;color:var(--muted);margin-top:8px}
+.gview{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px;align-items:center}
+.gview .sp{flex:1}
+.ggrp{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.ggrp .card h3{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gmem{display:flex;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px;cursor:pointer}
+.gmem:first-of-type{border-top:0}
+.gmem small{display:block;color:var(--muted);font-size:12px}
+.gcnt{font-size:12px;color:var(--muted);font-weight:600}
+.fchip[aria-pressed="true"] .gcnt{color:inherit;opacity:.85}
+.fotoedit{grid-column:1/-1;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fotoedit .btns{display:flex;gap:8px;flex-wrap:wrap}
+.prbox{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0;min-width:0}
+.prbox legend{font-size:12px;font-weight:700;padding:0 6px;color:var(--muted)}
+.prrow{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr) auto;gap:6px;margin-bottom:8px;align-items:center}
+.prrow select,.prrow input{width:100%;min-width:0}
+.prrow .btn{padding:6px 10px}
+.prbox small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+@media(max-width:560px){.prrow{grid-template-columns:minmax(0,1fr) auto}.prrow select{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -894,15 +925,28 @@ function vWarga(){
   var stat=function(col,ci,ic,n,l,sub){return '<div class="stat" style="--c:var(--'+col+');--ci:var(--'+ci+')"><div class="ic">'+svg(ic)+'</div><div><b>'+n+'</b><span>'+l+'</span><small>'+sub+'</small></div></div>'};
   var head='<div class="pagehead"><div><h1>Warga Kokum</h1><p>Guru penasihat dan pegawai penyelaras unit kokurikulum</p></div><button class="btn pri" data-act="newguru">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah warga</button></div>';
   if(!rows.length&&!unk.length)return head+'<div class="card empty"><h3>Belum ada warga kokum</h3><p>Tambah guru penasihat supaya nama mereka boleh dipilih sebagai PIC program.</p></div>';
+  var names=gNames(S.gwKat==='tiada'?'semua':S.gwKat);
+  if(S.gwNama&&names.every(function(n){return n.toLowerCase()!==S.gwNama.toLowerCase()}))S.gwNama='';
+  var list=gFilter();
+  var cnt=function(k){return rows.filter(function(g){return k==='tiada'?!peranOf(g).length:peranOf(g).some(function(r){return r.kat===k})}).length};
+  var chips=[['semua','Semua',rows.length]].concat(GK.map(function(k){return [k[0],k[2],cnt(k[0])]})).concat([['tiada','Belum ada peranan',cnt('tiada')]]);
+  var views=[['kad','Kad'],['kumpulan','Ikut unit / kelab'],['jadual','Jadual']];
+  var body;
+  if(!list.length)body='<div class="card empty"><h3>Tiada warga sepadan</h3><p>Cuba tukar penapis di atas.</p></div>';
+  else if(S.gwView==='kad')body='<div class="gcards">'+list.map(gCard).join('')+'</div>';
+  else if(S.gwView==='kumpulan')body=gGroups(list)||'<div class="card empty"><h3>Belum ada peranan direkod</h3><p>Sunting guru dan tambah peranan (unit, kelab atau sukan) untuk melihat kumpulan di sini.</p></div>';
+  else body='<div class="card tablewrap"><table class="mtab"><thead><tr><th>Nama</th><th>Jawatan</th><th>Peranan</th><th>Program (PIC)</th><th>Pengiring</th><th></th></tr></thead><tbody>'+list.map(function(g){
+     var L=picProgs(g),nm=L.slice(0,2).map(function(p){return esc(p.nama)}).join(', ')+(L.length>2?' dan '+(L.length-2)+' lagi':'');
+     return '<tr><td><span style="display:inline-flex;gap:10px;align-items:center">'+avHtml(g,30)+'<b>'+esc(g.nama)+'</b></span></td><td>'+esc(g.jawatan||'-')+(g.unit?'<span class="mini">'+esc(g.unit)+'</span>':'')+'</td><td class="wrap">'+(peranOf(g).length?'<div class="gtags" style="margin:0">'+gTags(g)+'</div>':'<span style="color:var(--muted)">Belum ada</span>')+'</td><td class="wrap">'+(L.length?'<b>'+L.length+'</b><span class="mini">'+nm+'</span>':'<span style="color:var(--muted)">Belum ada</span>')+'</td><td class="wrap">'+(function(){var Q=pgrProgs(g);return Q.length?'<b>'+Q.length+'</b><span class="mini">'+Q.slice(0,2).map(function(p){return esc(p.nama)}).join(', ')+(Q.length>2?' dan '+(Q.length-2)+' lagi':'')+'</span>':'<span style="color:var(--muted)">Belum ada</span>'})()+'</td><td class="num"><button class="btn" data-act="editguru" data-id="'+esc(g.id)+'">Sunting</button></td></tr>'}).join('')+'</tbody></table></div>';
   return head+
    (rows.length?'<section class="pstats">'+
     stat('violet','violet-ink',NAVICON.warga,rows.length,'Warga kokum','Dalam senarai')+
     stat('green','green-ink','<path d="m5 12 5 5 9-10"/>',ada,'Ada tugasan PIC','Memegang sekurang-kurangnya satu program')+
     stat('amber','amber-ink','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',rows.length-ada,'Belum ada tugasan','Belum jadi PIC mana-mana program')+'</section>':'')+
    (unk.length?'<div class="card" style="margin-bottom:14px"><h3><i>'+svg('<path d="M12 4 3 20h18zM12 10v5M12 17.5h.01"/>')+'</i>Nama PIC belum ada dalam senarai warga</h3><p style="color:var(--muted);font-size:13px">Nama ini digunakan sebagai PIC dalam program tetapi belum didaftarkan di sini. Tekan nama untuk menambahnya.</p><div class="unk">'+unk.map(function(n){return '<button class="btn" data-act="addpic" data-n="'+esc(n)+'">'+svg('<path d="M12 5v14M5 12h14"/>')+esc(n)+'</button>'}).join('')+'</div></div>':'')+
-   (rows.length?'<div class="card tablewrap"><table class="mtab"><thead><tr><th>Nama</th><th>Jawatan</th><th>Unit</th><th>Program (PIC)</th><th>Pengiring</th><th></th></tr></thead><tbody>'+rows.map(function(g){
-     var L=picProgs(g),nm=L.slice(0,2).map(function(p){return esc(p.nama)}).join(', ')+(L.length>2?' dan '+(L.length-2)+' lagi':'');
-     return '<tr><td><b>'+esc(g.nama)+'</b></td><td>'+esc(g.jawatan||'-')+'</td><td>'+esc(g.unit||'Semua unit')+'</td><td class="wrap">'+(L.length?'<b>'+L.length+'</b><span class="mini">'+nm+'</span>':'<span style="color:var(--muted)">Belum ada</span>')+'</td><td class="wrap">'+(function(){var Q=pgrProgs(g);return Q.length?'<b>'+Q.length+'</b><span class="mini">'+Q.slice(0,2).map(function(p){return esc(p.nama)}).join(', ')+(Q.length>2?' dan '+(Q.length-2)+' lagi':'')+'</span>':'<span style="color:var(--muted)">Belum ada</span>'})()+'</td><td class="num"><button class="btn" data-act="editguru" data-id="'+esc(g.id)+'">Sunting</button></td></tr>'}).join('')+'</tbody></table></div>':'');
+   (rows.length?'<div class="filters">'+chips.map(function(c){return '<button class="fchip" data-act="gwkat" data-v="'+c[0]+'" aria-pressed="'+(S.gwKat===c[0])+'">'+esc(c[1])+' <span class="gcnt">'+c[2]+'</span></button>'}).join('')+
+    (names.length&&S.gwKat!=='tiada'?'<select class="inline" id="gwNama" aria-label="Tapis unit, kelab atau sukan"><option value="">Semua unit / kelab / sukan</option>'+names.map(function(n){return '<option'+(S.gwNama.toLowerCase()===n.toLowerCase()?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select>':'')+'</div>'+
+    '<div class="gview" role="group" aria-label="Cara paparan">'+views.map(function(v){return '<button class="fchip" data-act="gwview" data-v="'+v[0]+'" aria-pressed="'+(S.gwView===v[0])+'">'+v[1]+'</button>'}).join('')+'</div>'+body:'');
 }
 
 /* ---------- Fasa 6: guru pengiring, jadual pengiring, cetak ---------- */
@@ -983,6 +1027,92 @@ function pjProfil(m){
    '<p class="pfoot">Dicetak pada '+esc(new Date().toLocaleDateString('ms-MY',{day:'numeric',month:'long',year:'numeric'}))+' melalui Kokum SmartTrax '+esc(BRAND.singkatan)+'</p></div>';
 }
 
+/* ---------- Fasa 7: gambar & peranan guru ---------- */
+var GK=[['uni','Unit Beruniform','Beruniform'],['klb','Kelab / Persatuan','Kelab'],['spt','Sukan / Permainan','Sukan'],['lain','Lain-lain','Lain-lain']];
+var GJAW=['Guru Penasihat','Penolong Penasihat','Setiausaha','Bendahari','AJK','Jurulatih','Pengurus'];
+var GCOL=['#6a4ce0','#2f8de4','#27ad6a','#e08a12','#ec5b9a','#1ea5b8','#d9672e','#8e2a54'];
+S.gwKat='semua';S.gwNama='';S.gwView='kad';
+try{var gv0=localStorage.getItem('kokum.gwview');if(gv0==='kad'||gv0==='kumpulan'||gv0==='jadual')S.gwView=gv0}catch(e){}
+function gkIdx(k){for(var i=0;i<GK.length;i++)if(GK[i][0]===k)return i;return 3}
+function peranOf(g){var a=g&&g.peranan;return Array.isArray(a)?a.filter(function(r){return r&&typeof r==='object'&&String(r.nama||'').trim()}).map(function(r){return {kat:GK[gkIdx(r.kat)][0],nama:String(r.nama).trim(),jawatan:String(r.jawatan||'').trim()}}):[]}
+function gHash(n){var h=0;String(n||'').split('').forEach(function(c){h=(h*31+c.charCodeAt(0))>>>0});return h}
+function gInit(n){var p=String(n||'').replace(/^(cikgu|cik|encik|puan|tuan|ustaz|ustazah|en\.?|pn\.?|sir|miss)\s+/i,'').trim().split(/\s+/).filter(Boolean);if(!p.length)return '?';return (p[0][0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase()}
+function avHtml(g,size){
+  size=size||56;var f=g&&typeof g.foto==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(g.foto)?g.foto:'';
+  if(f)return '<img class="gav" style="--s:'+size+'px" alt="" src="'+f+'">';
+  return '<span class="gav" aria-hidden="true" style="--s:'+size+'px;--bg:'+GCOL[gHash(g&&g.nama)%GCOL.length]+'">'+esc(gInit(g&&g.nama))+'</span>';
+}
+function gTags(g){return peranOf(g).map(function(r){return '<span class="gtag '+r.kat+'" title="'+esc(r.jawatan||GK[gkIdx(r.kat)][1])+'">'+esc(r.nama)+(r.jawatan&&!/penasihat/i.test(r.jawatan)?' · '+esc(r.jawatan):'')+'</span>'}).join('')}
+function gNames(kat){
+  var seen={},out=[];S.guru.forEach(function(g){peranOf(g).forEach(function(r){if((kat==='semua'||kat===r.kat)&&!seen[r.kat+'|'+r.nama.toLowerCase()]){seen[r.kat+'|'+r.nama.toLowerCase()]=1;out.push(r.nama)}})});
+  return out.filter(function(n,i){return out.findIndex(function(m){return m.toLowerCase()===n.toLowerCase()})===i}).sort(function(a,b){return a.localeCompare(b)});
+}
+function gOpts(kat){
+  var seen={},out=[];
+  function add(v){v=String(v||'').trim();var k=v.toLowerCase();if(v&&!seen[k]){seen[k]=1;out.push(v)}}
+  S.guru.forEach(function(g){peranOf(g).forEach(function(r){if(!kat||r.kat===kat)add(r.nama)})});
+  (kat?(PJ_DEF[kat]||[]):[].concat(PJ_DEF.uni,PJ_DEF.klb,PJ_DEF.spt)).forEach(add);
+  return out;
+}
+function prRow(r){
+  r=r||{};
+  return '<div class="prrow"><select class="prkat" aria-label="Kategori">'+GK.map(function(k){return '<option value="'+k[0]+'"'+((r.kat||'uni')===k[0]?' selected':'')+'>'+esc(k[1])+'</option>'}).join('')+'</select>'+
+   '<input class="prnama" type="text" list="gpNama" placeholder="Nama unit / kelab / sukan" aria-label="Nama unit, kelab atau sukan" value="'+esc(r.nama||'')+'">'+
+   '<input class="prjaw" type="text" list="gpJaw" placeholder="Jawatan" aria-label="Jawatan" value="'+esc(r.jawatan==null?'Guru Penasihat':r.jawatan)+'">'+
+   '<button type="button" class="btn" data-act="prdel" aria-label="Buang peranan">×</button></div>';
+}
+function prRead(){
+  return Array.prototype.map.call(document.querySelectorAll('#frm .prrow'),function(row){
+    return {kat:row.querySelector('.prkat').value,nama:row.querySelector('.prnama').value.trim(),jawatan:row.querySelector('.prjaw').value.trim()}}).filter(function(r){return r.nama});
+}
+function fotoResize(file,size,maxLen){
+  return new Promise(function(res,rej){
+    if(!file||!/^image\//.test(file.type||'')){rej(new Error('Pilih fail gambar'));return}
+    var url=URL.createObjectURL(file),im=new Image();
+    im.onload=function(){
+      try{
+        var w=im.naturalWidth,h=im.naturalHeight,m=Math.min(w,h),c=document.createElement('canvas');c.width=c.height=size;
+        var cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,size,size);cx.drawImage(im,(w-m)/2,(h-m)/2,m,m,0,0,size,size);
+        var q=.78,out=c.toDataURL('image/jpeg',q);
+        while(out.length>maxLen&&q>.3){q-=.08;out=c.toDataURL('image/jpeg',q)}
+        URL.revokeObjectURL(url);
+        if(out.length>maxLen||out.indexOf('data:image/jpeg')!==0)rej(new Error('Gambar terlalu besar'));else res(out)
+      }catch(e){rej(e)}
+    };
+    im.onerror=function(){URL.revokeObjectURL(url);rej(new Error('Gambar tidak dapat dibaca'))};
+    im.src=url;
+  });
+}
+function gFilter(){
+  var rows=S.guru.slice().sort(function(a,b){return String(a.nama).localeCompare(String(b.nama))});
+  return rows.filter(function(g){
+    var P=peranOf(g);
+    if(S.gwKat==='tiada')return !P.length;
+    if(S.gwKat!=='semua'&&!P.some(function(r){return r.kat===S.gwKat&&(!S.gwNama||r.nama.toLowerCase()===S.gwNama.toLowerCase())}))return false;
+    if(S.gwKat==='semua'&&S.gwNama&&!P.some(function(r){return r.nama.toLowerCase()===S.gwNama.toLowerCase()}))return false;
+    return true});
+}
+function gCard(g){
+  var P=picProgs(g).length,Q=pgrProgs(g).length;
+  return '<div class="gcard" role="button" tabindex="0" data-act="editguru" data-id="'+esc(g.id)+'" aria-label="Sunting '+esc(g.nama)+'">'+avHtml(g,58)+'<div><b>'+esc(g.nama)+'</b><span class="gsub">'+esc(g.jawatan||'Jawatan belum diisi')+(g.unit?' · '+esc(g.unit):'')+'</span>'+
+   (peranOf(g).length?'<div class="gtags">'+gTags(g)+'</div>':'<div class="gmeta">Belum ada peranan</div>')+
+   (P||Q?'<div class="gmeta">'+(P?'PIC '+P+' program':'')+(P&&Q?' · ':'')+(Q?'Pengiring '+Q+' program':'')+'</div>':'')+'</div></div>';
+}
+function gGroups(list){
+  var cats=S.gwKat==='semua'||S.gwKat==='tiada'?GK.map(function(k){return k[0]}):[S.gwKat],html='';
+  cats.forEach(function(kat){
+    var map={},order=[];
+    list.forEach(function(g){peranOf(g).forEach(function(r){if(r.kat!==kat)return;if(S.gwNama&&r.nama.toLowerCase()!==S.gwNama.toLowerCase())return;var k=r.nama.toLowerCase();if(!map[k]){map[k]={n:r.nama,m:[]};order.push(k)}map[k].m.push({g:g,j:r.jawatan})})});
+    order.sort().forEach(function(k){var G=map[k];
+      html+='<div class="card"><h3><span class="gtag '+kat+'">'+esc(GK[gkIdx(kat)][2])+'</span>'+esc(G.n)+'<span class="gcnt">'+G.m.length+' guru</span></h3>'+G.m.map(function(x){return '<div class="gmem" data-act="editguru" data-id="'+esc(x.g.id)+'">'+avHtml(x.g,36)+'<div><b>'+esc(x.g.nama)+'</b><small>'+esc(x.j||x.g.jawatan||'')+'</small></div></div>'}).join('')+'</div>'});
+  });
+  if(S.gwKat==='semua'||S.gwKat==='tiada'){
+    var tiada=list.filter(function(g){return !peranOf(g).length});
+    if(tiada.length&&!S.gwNama)html+='<div class="card"><h3>Belum ada peranan<span class="gcnt">'+tiada.length+' guru</span></h3>'+tiada.map(function(g){return '<div class="gmem" data-act="editguru" data-id="'+esc(g.id)+'">'+avHtml(g,36)+'<div><b>'+esc(g.nama)+'</b><small>'+esc(g.jawatan||'')+'</small></div></div>'}).join('')+'</div>';
+  }
+  return html?'<div class="ggrp">'+html+'</div>':'';
+}
+
 /* ---------- Fasa 5: PAJSK (murid Tahun 4 hingga 6) ---------- */
 var PJ_PERINGKAT=['Sekolah','Zon/Daerah','Bahagian','Negeri','Kebangsaan','Antarabangsa'];
 var PJ_CAPAI=['Johan','Naib Johan','Tempat Ketiga','Tempat Keempat','Emas','Perak','Gangsa','Penyertaan'];
@@ -1012,6 +1142,7 @@ function pjOpts(kat){
   function add(v){v=String(v||'').trim();var k=v.toLowerCase();if(v&&!seen[k]){seen[k]=1;out.push(v)}}
   S.pajsk.forEach(function(m){Object.keys(m.rekod||{}).forEach(function(y){add(pjRec(m,y)[kat])})});
   (PJ_DEF[kat]||[]).forEach(add);
+  S.guru.forEach(function(g){peranOf(g).forEach(function(r){if(r.kat===kat)add(r.nama)})});
   return out;
 }
 function pjDL(id,list){return '<datalist id="'+id+'">'+list.map(function(n){return '<option value="'+esc(n)+'">'}).join('')+'</datalist>'}
@@ -1478,11 +1609,17 @@ function progForm(p){
    }});
 }
 function guruForm(g){
-  g=g||{};var isNew=!g.id;
-  openForm({title:isNew?'Tambah warga kokum':'Sunting warga kokum',values:g,narrow:1,extra:'<datalist id="jawlist">'+JAWATAN.map(function(j){return '<option value="'+esc(j)+'">'}).join('')+'</datalist>',
+  g=g||{};var isNew=!g.id;S.gfoto=typeof g.foto==='string'?g.foto:'';
+  var pr=peranOf(g);
+  openForm({title:isNew?'Tambah warga kokum':'Sunting warga kokum',values:g,
+   extra:'<datalist id="jawlist">'+JAWATAN.map(function(j){return '<option value="'+esc(j)+'">'}).join('')+'</datalist>'+pjDL('gpNama',gOpts(''))+pjDL('gpJaw',GJAW)+
+    '<div class="fotoedit"><span id="gfotoPrev">'+avHtml({nama:g.nama,foto:S.gfoto},72)+'</span><div><div class="btns"><label class="btn" for="gFoto" style="cursor:pointer;margin:0">'+svg('<path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>')+'Pilih gambar</label><button type="button" class="btn" data-act="gfotodel"'+(S.gfoto?'':' hidden')+' id="gfotoDel">Buang gambar</button></div><input id="gFoto" type="file" accept="image/*" hidden><small style="display:block;color:var(--muted);font-size:12px;margin-top:6px">Gambar dikecilkan secara automatik.</small></div></div>'+
+    '<fieldset class="prbox"><legend>Peranan (unit, kelab, sukan)</legend><div id="prList">'+pr.map(prRow).join('')+'</div><button type="button" class="btn" data-act="pradd">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah peranan</button><small>Contoh: Guru Penasihat · Badminton. Satu guru boleh ada banyak peranan.</small></fieldset>',
    fields:[{k:'nama',l:'Nama',req:1,full:1},{k:'jawatan',l:'Jawatan',full:1,list:'jawlist'},{k:'unit',l:'Unit',full:1,t:'select',o:[['','Semua unit']].concat(UNITS.map(function(u){return [u,u]}))}],
    onDelete:isNew?null:function(){del('guru',g.id).then(function(){closeModal();toast('Dipadam')})},
-   onSave:function(v){put('guru',g.id||newId('g'),v).then(function(){closeModal();toast('Disimpan')})}});
+   onSave:function(v){
+     var rec={nama:v.nama,jawatan:v.jawatan,unit:v.unit,peranan:prRead(),foto:S.gfoto||''};
+     put('guru',g.id||newId('g'),rec).then(function(){closeModal();toast('Disimpan')})}});
 }
 function showDetail(id){var p=byId(id);if(!p)return;S.mdetail=id;openModal('<div class="mh"><h2>Maklumat program</h2><button type="button" class="mx" data-act="close" aria-label="Tutup">×</button></div>'+detail(p));}
 
@@ -1506,6 +1643,11 @@ document.addEventListener('click',function(e){
   else if(a==='seed')seed();
   else if(a==='pjnew')pjForm();
   else if(a==='pjbulk')pjBulk();
+  else if(a==='gwkat'){S.gwKat=t.dataset.v;S.gwNama='';render()}
+  else if(a==='gwview'){S.gwView=t.dataset.v;try{localStorage.setItem('kokum.gwview',S.gwView)}catch(x){}render()}
+  else if(a==='pradd'){var pl=document.getElementById('prList');if(pl){pl.insertAdjacentHTML('beforeend',prRow({}));var nn=pl.querySelectorAll('.prnama');nn[nn.length-1].focus()}}
+  else if(a==='prdel'){var rw=t.closest('.prrow');if(rw)rw.remove()}
+  else if(a==='gfotodel'){S.gfoto='';var gp=document.getElementById('gfotoPrev');if(gp)gp.innerHTML=avHtml({nama:(document.getElementById('f_nama')||{}).value,foto:''},72);t.hidden=true}
   else if(a==='jadual')jadual();
   else if(a==='jbcopy')copyText(jbText(),'Jadual disalin');
   else if(a==='jbprint')jbPrint();
@@ -1547,12 +1689,14 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&!$('#ovl').hidden&&!S.lock)closeModal();
-  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('pcard')){e.preventDefault();e.target.click()}
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&(e.target.classList.contains('pcard')||e.target.classList.contains('gcard'))){e.preventDefault();e.target.click()}
 });
 document.addEventListener('change',function(e){
   if(e.target.id==='unitSel'){S.unit=e.target.value;render()}
   else if(e.target.id==='bulanSel'){S.bulan=e.target.value;render()}
   else if(e.target.id==='pdfJenis'){S.pdfJenis=e.target.value}
+  else if(e.target.id==='gwNama'){S.gwNama=e.target.value;render()}
+  else if(e.target.id==='gFoto'){var gf=e.target.files&&e.target.files[0];e.target.value='';if(gf)fotoResize(gf,160,32000).then(function(d){S.gfoto=d;var gp=document.getElementById('gfotoPrev');if(gp)gp.innerHTML=avHtml({nama:(document.getElementById('f_nama')||{}).value,foto:d},72);var bd=document.getElementById('gfotoDel');if(bd)bd.hidden=false}).catch(function(er){toast(er&&er.message?er.message:'Gambar tidak dapat diproses')})}
   else if(e.target.id==='jbSel'){S.jb=e.target.value;jadual()}
   else if(e.target.id==='yearSel'){var yv=+e.target.value,nw=new Date();S.year=yv;try{localStorage.setItem('kokum.tahun',String(yv))}catch(x){}S.cal=new Date(yv,yv===nw.getFullYear()?nw.getMonth():0,1);render()}
   else if(e.target.id==='upImg'){if(e.target.files&&e.target.files.length)uploadFiles(e.target.files,'gambar')}
