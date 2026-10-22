@@ -951,10 +951,10 @@ function vUtama(){
    stat('amber','amber-ink','<path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"/>',akan,'Akan Datang','Belum bermula')+
    stat('pink','violet-ink','<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 5a3.5 3.5 0 0 1 0 7M18 14c2.5.5 4 2.5 4 5.5"/>',murid,'Penyertaan Murid','Tahun '+curYear())+'</section>'+fokus()+
   '<section class="charts2">'+
-   '<div class="card chart c-trend"><h3><i>'+svg('<path d="M5 20V10M12 20V4M19 20v-7"/>')+'</i>Trend Program Bulanan<span class="hint">Bilangan program, '+esc(curYear())+'</span></h3>'+colChart(months,MON,{label:'Program setiap bulan',hl:nowM,unit:'program',color:'var(--violet)',w:cw,h:ch})+'</div>'+
+   '<div class="card chart c-trend"><h3><i>'+svg('<path d="M5 20V10M12 20V4M19 20v-7"/>')+'</i>Trend Program Bulanan<span class="hint">Bilangan program, '+esc(curYear())+'</span></h3>'+colChart(months,MON,{label:'Program setiap bulan',hl:nowM,unit:'program',colors:PAL,w:cw,h:ch})+'</div>'+
    '<div class="card c-status"><h3><i>'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 4"/>')+'</i>Status Program</h3><div class="donut">'+donut(parts,P.length)+'<div class="legend">'+parts.map(function(p){return '<div><i style="background:'+p.c+'"></i><span>'+p.l+'<br><b>'+p.v+'</b> <small style="color:var(--muted)">('+pct(p.v)+'%)</small></span></div>'}).join('')+'</div></div></div>'+
    '<div class="card c-unit"><h3><i>'+svg('<path d="M4 6h10M4 12h16M4 18h7"/>')+'</i>Program Mengikut Unit<span class="hint">'+P.length+' program</span></h3>'+(P.length?hBars(unitRows):'<p class="muted" style="color:var(--muted);padding:20px 0">Belum ada program pada tahun ini.</p>')+'</div>'+
-   '<div class="card chart c-pen"><h3><i>'+svg(NAVICON.warga)+'</i>Penyertaan Mengikut Tahun<span class="hint">'+murid+' murid</span></h3>'+colChart(PN.t,['Tahun 1','Tahun 2','Tahun 3','Tahun 4','Tahun 5','Tahun 6'],{label:'Murid setiap tahun',unit:'murid',color:'var(--blue)',w:cw,h:ch})+'</div></section>'+
+   '<div class="card chart c-pen"><h3><i>'+svg(NAVICON.warga)+'</i>Penyertaan Mengikut Tahun<span class="hint">'+murid+' murid</span></h3>'+colChart(PN.t,['Tahun 1','Tahun 2','Tahun 3','Tahun 4','Tahun 5','Tahun 6'],{label:'Murid setiap tahun',unit:'murid',colors:PAL,w:cw,h:ch})+'</div></section>'+
   '<section class="work"><div><div class="sechead"><h2>Program Terkini</h2><button class="link" data-act="nav" data-p="program">Lihat Semua →</button></div>'+
    (list.length?'<div class="grid3">'+list.map(card).join('')+'</div>':emptyProgs())+'</div>'+
    '<div><div class="sechead"><h2>Maklumat Program</h2></div>'+(S.programs.length?detail(byId(S.sel)):'<div class="card empty"><p>Maklumat program akan dipaparkan di sini.</p></div>')+'</div></section>'+galeri();
@@ -1129,17 +1129,17 @@ function niceAxis(maxv){
   var n=Math.max(3,Math.ceil(maxv/st));if(n*st===maxv&&maxv>0&&n<4)n+=1;
   return {step:st,n:n,max:st*n};
 }
-var BARID=0;
+var BARID=0,PAL=['var(--violet)','var(--pink)','var(--amber)','var(--green)','var(--blue)','#1ea5b8'];
 function colChart(vals,labels,o){
   o=o||{};var w=o.w||560,h=o.h||220,L=34,R=10,T=22,B=28,iw=w-L-R,ih=h-T-B,n=vals.length,ax=niceAxis(Math.max.apply(null,vals.concat([0]))),id='bg'+(++BARID),out='';
-  var col=o.color||'var(--violet)';
-  out+='<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col+'" stop-opacity="1"/><stop offset="1" stop-color="'+col+'" stop-opacity=".55"/></linearGradient></defs>';
+  var cols=o.colors||[o.color||'var(--violet)'];
+  out+='<defs>'+cols.map(function(col,k){return '<linearGradient id="'+id+'_'+k+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col+'" stop-opacity="1"/><stop offset="1" stop-color="'+col+'" stop-opacity=".6"/></linearGradient>'}).join('')+'</defs>';
   for(var i=0;i<=ax.n;i++){var y=T+ih-ih*i/ax.n;out+='<line class="'+(i?'grid':'axis')+'" x1="'+L+'" x2="'+(w-R)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'"/><text x="'+(L-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+(ax.step*i)+'</text>'}
   var slot=iw/n,bw=Math.min(34,slot*.56);
   vals.forEach(function(v,i){
     var x=L+slot*i+(slot-bw)/2,bh=Math.max(0,ih*v/ax.max),y=T+ih-bh,hl=(o.hl===i),r=Math.min(6,bw/2,bh);
     if(bh>0){
-      out+='<path d="M'+x.toFixed(1)+' '+(y+bh).toFixed(1)+'V'+(y+r).toFixed(1)+'Q'+x.toFixed(1)+' '+y.toFixed(1)+' '+(x+r).toFixed(1)+' '+y.toFixed(1)+'H'+(x+bw-r).toFixed(1)+'Q'+(x+bw).toFixed(1)+' '+y.toFixed(1)+' '+(x+bw).toFixed(1)+' '+(y+r).toFixed(1)+'V'+(y+bh).toFixed(1)+'Z" fill="url(#'+id+')" opacity="'+(o.hl==null||hl?1:.62)+'"><title>'+esc(labels[i])+': '+v+(o.unit?' '+o.unit:'')+'</title></path>';
+      out+='<path d="M'+x.toFixed(1)+' '+(y+bh).toFixed(1)+'V'+(y+r).toFixed(1)+'Q'+x.toFixed(1)+' '+y.toFixed(1)+' '+(x+r).toFixed(1)+' '+y.toFixed(1)+'H'+(x+bw-r).toFixed(1)+'Q'+(x+bw).toFixed(1)+' '+y.toFixed(1)+' '+(x+bw).toFixed(1)+' '+(y+r).toFixed(1)+'V'+(y+bh).toFixed(1)+'Z" fill="url(#'+id+'_'+(i%cols.length)+')" opacity="'+(o.hl==null||hl?1:.88)+'"><title>'+esc(labels[i])+': '+v+(o.unit?' '+o.unit:'')+'</title></path>';
       out+='<text class="vl" x="'+(x+bw/2).toFixed(1)+'" y="'+(y-6).toFixed(1)+'" text-anchor="middle">'+v+'</text>';
     }
     out+='<text'+(hl?' class="now"':'')+' x="'+(x+bw/2).toFixed(1)+'" y="'+(h-9)+'" text-anchor="middle">'+esc(labels[i])+'</text>';
