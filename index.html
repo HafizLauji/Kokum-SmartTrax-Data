@@ -543,9 +543,14 @@ tr:last-child td{border-bottom:0}
 .pcmed.s{background:linear-gradient(135deg,#e6e8ee,#b8bdc9);color:#23262f}
 .pcmed.b{background:linear-gradient(135deg,#e8b48a,#c27b45);color:#2c1606}
 .pcmed.n{background:var(--surface-2);color:var(--fg);border:1px solid var(--line)}
-.pcnames{font-size:13px;font-weight:600;overflow-wrap:anywhere}
-.pcnames small{color:var(--muted);font-weight:600}
-.pcmeta{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.pcbody h4{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pcwho{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px}
+.pcwho .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pcwho .ct{flex:none;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pcmeta{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pcchips span{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
+.pcchips.gr span{background:color-mix(in srgb,var(--violet) 12%,var(--surface))}
 .pcdet{text-align:center}
 .pcshape{display:grid;gap:4px;margin-top:8px;font-size:12px;font-weight:600;color:var(--muted)}
 .pcfil{margin-top:4px}
@@ -1055,14 +1060,15 @@ function vWarga(){
 /* ---------- Fasa 6: guru pengiring, jadual pengiring, cetak ---------- */
 function pgrOf(p){var a=p&&p.dok&&p.dok.pgr;return Array.isArray(a)?a.map(function(x){return String(x||'').trim()}).filter(Boolean):[]}
 function pgrProgs(g){var k=picKey(g.nama);return k?S.programs.filter(function(p){return pgrOf(p).some(function(n){return picKey(n)===k})}):[]}
-function pgrBox(p){
-  var cur=pgrOf(p),names=guruNames(),have={};names.forEach(function(n){have[picKey(n)]=1});
+function pgrBox(p){return pgrBoxOf(pgrOf(p),'Guru pengiring','Bilangan guru akan dikira daripada senarai ini.')}
+function pgrBoxOf(cur,legend,note){
+  var names=guruNames(),have={};names.forEach(function(n){have[picKey(n)]=1});
   var other=cur.filter(function(n){return !have[picKey(n)]});
   var chk=names.map(function(n){var on=cur.some(function(c){return picKey(c)===picKey(n)});return '<label><input type="checkbox" name="pgrc" value="'+esc(n)+'"'+(on?' checked':'')+'>'+esc(n)+'</label>'}).join('');
-  return '<fieldset class="pgrbox"><legend>Guru pengiring</legend>'+
+  return '<fieldset class="pgrbox"><legend>'+esc(legend)+'</legend>'+
    (names.length?'<div class="pgrgrid">'+chk+'</div>':'<small style="margin:0 0 6px">Senarai Warga Kokum masih kosong. Taip nama di bawah, atau tambah guru di menu Warga Kokum.</small>')+
    '<input id="pgrx" name="pgrx" type="text" placeholder="Nama lain (asingkan dengan koma)" value="'+esc(other.join(', '))+'" aria-label="Nama guru pengiring lain">'+
-   '<small>Bilangan guru akan dikira daripada senarai ini.</small></fieldset>';
+   '<small>'+esc(note)+'</small></fieldset>';
 }
 function pgrRead(v){
   var out=[],seen={};
@@ -1338,13 +1344,20 @@ function pcMedia(x,big){
   if(ok&&x.bentuk==='segi')return '<div class="pcmedia seg'+(big?' big':'')+'"><img alt="" src="'+x.foto+'"></div>';
   return '<div class="pcmedia cir'+(big?' big':'')+'" style="--pc:'+col+'">'+(ok?'<img alt="" src="'+x.foto+'">':'<span class="pcph">'+svg(NAVICON.pencapaian)+'</span>')+'</div>';
 }
+function tcase(s){
+  s=String(s||'').trim();if(!s||/[a-z]/.test(s))return s;
+  return s.toLowerCase().split(/\s+/).map(function(w,i){
+    if(i&&/^(bin|binti|bte|bt|a\/l|a\/p|anak)$/.test(w))return w;
+    return w.replace(/(^|[-'(@])([a-z])/g,function(m,a,b){return a+b.toUpperCase()})}).join(' ');
+}
+function pcGuru(x){return String(x.pembimbing||'').split(/[,;\n]/).map(function(n){return tcase(n)}).filter(Boolean)}
 function pcCard(x){
-  var N=pcNames(x),col=PC_COL[x.peringkat]||'var(--violet)';
+  var N=pcNames(x).map(tcase),G=pcGuru(x),col=PC_COL[x.peringkat]||'var(--violet)';
   return '<div class="pccard" role="button" tabindex="0" data-act="pcopen" data-id="'+esc(x.id)+'" aria-label="'+esc(x.tajuk)+'" style="--pc:'+col+'">'+pcMedia(x)+
    '<div class="pcbody"><div class="pcrow"><span class="pjb" style="background:color-mix(in srgb,'+col+' 18%,var(--surface))">'+esc(x.peringkat||'Sekolah')+'</span>'+pcMedal(x)+'</div>'+
    '<h4>'+esc(x.tajuk)+'</h4>'+
-   '<div class="pcnames">'+(N.length?esc(N.slice(0,3).join(', '))+(N.length>3?' <small>+'+(N.length-3)+' lagi</small>':''):'<span class="miss">Nama murid belum diisi</span>')+'</div>'+
-   '<small class="pcmeta">'+esc(pcKatNama(x.kategori))+(x.pembimbing?' · '+esc(x.pembimbing):'')+'</small></div></div>';
+   (N.length?'<div class="pcwho" title="'+esc(N.join(', '))+'"><span class="nm">'+esc(N.slice(0,2).join(', '))+'</span>'+(N.length>1?'<span class="ct">'+N.length+' murid</span>':'')+'</div>':'<div class="pcwho"><span class="miss">Nama murid belum diisi</span></div>')+
+   '<small class="pcmeta" title="'+esc(G.join(', '))+'">'+esc(pcKatNama(x.kategori))+(G.length?' · '+esc(G[0])+(G.length>1?' +'+(G.length-1):''):'')+'</small></div></div>';
 }
 function vPencapaian(){
   var y=curYear();
@@ -1369,11 +1382,12 @@ function vPencapaian(){
    (list.length?'<div class="pcgrid">'+list.map(pcCard).join('')+'</div>':'<div class="card empty"><h3>Tiada pencapaian sepadan</h3><p>Cuba tukar penapis atau kata carian.</p></div>');
 }
 function pcDetail(id){
-  var x=pcBy(id);if(!x)return;var N=pcNames(x),col=PC_COL[x.peringkat]||'var(--violet)',d=pd(x.tarikh);
-  var row=function(l,v){return v?'<div class="pjrow"><div><small>'+esc(l)+'</small><b>'+v+'</b></div></div>':''};
+  var x=pcBy(id);if(!x)return;var N=pcNames(x).map(tcase),G=pcGuru(x),col=PC_COL[x.peringkat]||'var(--violet)',d=pd(x.tarikh);
+  var row=function(l,v){return v?'<div class="pjrow"><div><small>'+esc(l)+'</small>'+v+'</div></div>':''};
+  var chips=function(a,c){return '<div class="pcchips'+(c?' '+c:'')+'">'+a.map(function(n){return '<span>'+esc(n)+'</span>'}).join('')+'</div>'};
   openModal('<div class="mh"><div><h2>'+esc(x.tajuk)+'</h2><small style="color:var(--muted)">'+esc(pcKatNama(x.kategori))+' · '+esc(x.tahun)+'</small></div><button type="button" class="mx" data-act="close" aria-label="Tutup">×</button></div>'+
    '<div class="mb"><div style="grid-column:1/-1"><div class="pcdet" style="--pc:'+col+'">'+pcMedia(x,true)+'<div class="pcrow" style="justify-content:center;margin:12px 0 4px"><span class="pjb" style="background:color-mix(in srgb,'+col+' 18%,var(--surface))">'+esc(x.peringkat||'Sekolah')+'</span>'+pcMedal(x)+'</div></div>'+
-   row('Nama murid',N.length?N.map(esc).join('<br>'):'')+row('Guru pembimbing',esc(x.pembimbing||''))+(d.y?row('Tarikh',esc(range({tarikh:x.tarikh}))):'')+row('Catatan',esc(x.catatan||''))+'</div></div>'+
+   row(N.length>1?'Murid ('+N.length+')':'Nama murid',N.length?chips(N):'')+row(G.length>1?'Guru pembimbing ('+G.length+')':'Guru pembimbing',G.length?chips(G,'gr'):'')+(d.y?row('Tarikh','<b>'+esc(range({tarikh:x.tarikh}))+'</b>'):'')+row('Catatan',x.catatan?'<b>'+esc(x.catatan)+'</b>':'')+'</div></div>'+
    '<div class="mf"><button type="button" class="btn" data-act="close">Tutup</button><button type="button" class="btn pri" data-act="pcedit" data-id="'+esc(x.id)+'">Sunting</button></div>');
 }
 function pcPrev(){
@@ -1387,14 +1401,14 @@ function pcForm(x){
   var tj={};S.programs.forEach(function(p){if(p.nama)tj[p.nama]=1});S.pencapaian.forEach(function(c){if(c.tajuk)tj[c.tajuk]=1});
   openForm({title:isNew?'Tambah pencapaian':'Sunting pencapaian',values:Object.assign({tahun:curYear(),peringkat:'Sekolah',kategori:'sukan'},x),
    fields:[{k:'tajuk',l:'Pertandingan / acara',req:1,full:1,list:'pcTj'},{k:'kategori',l:'Kategori',t:'select',o:PC_KAT},{k:'peringkat',l:'Peringkat',t:'select',o:PJ_PERINGKAT.map(function(p){return [p,p]})},
-    {k:'kedudukan',l:'Pencapaian / tempat keberapa',list:'pcKed'},{k:'tahun',l:'Tahun',t:'number'},{k:'tarikh',l:'Tarikh (pilihan)',t:'date'},{k:'pembimbing',l:'Guru pembimbing',list:'gurulist'},
+    {k:'kedudukan',l:'Pencapaian / tempat keberapa',list:'pcKed'},{k:'tahun',l:'Tahun',t:'number'},{k:'tarikh',l:'Tarikh (pilihan)',t:'date'},
     {k:'pelajar',l:'Nama murid (satu nama setiap baris)',t:'textarea',rows:3,full:1,ph:'Ali bin Abu\nSiti binti Ahmad'},{k:'catatan',l:'Catatan',t:'textarea',rows:2,full:1}],
    extra:pjDL('pcTj',Object.keys(tj))+pjDL('pcKed',PC_KED)+'<datalist id="gurulist">'+guruNames().map(function(n){return '<option value="'+esc(n)+'">'}).join('')+'</datalist>'+
-    '<div class="fotoedit"><span id="pcFotoPrev"></span><div><div class="btns"><label class="btn" for="pcFoto" style="cursor:pointer;margin:0">'+svg('<path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>')+'Pilih gambar</label><button type="button" class="btn" data-act="pcfotodel" id="pcFotoDel" hidden>Buang gambar</button></div>'+
+    pgrBoxOf(String(x.pembimbing||'').split(/[,;\n]/).map(function(n){return n.trim()}).filter(Boolean),'Guru pembimbing','Tanda seorang atau beberapa guru (cth. 2 atau 3 orang).')+'<div class="fotoedit"><span id="pcFotoPrev"></span><div><div class="btns"><label class="btn" for="pcFoto" style="cursor:pointer;margin:0">'+svg('<path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>')+'Pilih gambar</label><button type="button" class="btn" data-act="pcfotodel" id="pcFotoDel" hidden>Buang gambar</button></div>'+
     '<label class="pcshape" for="pcBentuk">Bentuk gambar<select id="pcBentuk"><option value="bulat">Bulat (seorang murid)</option><option value="segi">Segi empat 4:3 (kumpulan / pasukan)</option></select></label><input id="pcFoto" type="file" accept="image/*" hidden></div></div><div class="fotocrop" id="fotoCrop" hidden></div>',
    onDelete:isNew?null:function(){if(!window.confirm('Padam pencapaian ini?'))return;del('pencapaian',x.id).then(function(){closeModal();toast('Dipadam')})},
    onSave:function(v){
-     put('pencapaian',x.id||newId('c'),{tajuk:v.tajuk,tahun:+v.tahun||curYear(),kategori:v.kategori,peringkat:v.peringkat,kedudukan:v.kedudukan,pelajar:v.pelajar,pembimbing:v.pembimbing,tarikh:v.tarikh||'',catatan:v.catatan,bentuk:S.pcbentuk,foto:S.pcfoto||''}).then(function(){closeModal();toast('Disimpan')})}});
+     put('pencapaian',x.id||newId('c'),{tajuk:v.tajuk,tahun:+v.tahun||curYear(),kategori:v.kategori,peringkat:v.peringkat,kedudukan:v.kedudukan,pelajar:v.pelajar,pembimbing:pgrRead(v).join(', '),tarikh:v.tarikh||'',catatan:v.catatan,bentuk:S.pcbentuk,foto:S.pcfoto||''}).then(function(){closeModal();toast('Disimpan')})}});
   var bs=document.getElementById('pcBentuk');if(bs)bs.value=S.pcbentuk;pcPrev();
 }
 
