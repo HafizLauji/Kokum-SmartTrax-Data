@@ -973,7 +973,7 @@ function detail(p){
    (p.catatan?'<div class="note">'+esc(p.catatan)+'</div>':'')+
    suggestNote(p)+attach(p)+'<div class="btns"><button class="btn pri" data-act="edit" data-id="'+esc(p.id)+'">'+svg('<path d="M4 20h4L19 9l-4-4L4 16z"/>')+'Edit</button>'+'<button class="btn" data-act="copyprog" data-id="'+esc(p.id)+'">'+svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>')+'Salin</button>'+
    '<button class="btn" data-act="toggledone" data-id="'+esc(p.id)+'">'+svg('<path d="m5 12 5 5 9-10"/>')+(done?'Buka semula':'Tandakan selesai')+'</button>'+
-   '<button class="btn" data-act="docs" data-id="'+esc(p.id)+'">'+svg('<path d="M6 3h8l5 5v13H6zM14 3v5h5"/>')+'Dokumen</button>'+(p.tarikh?'<a class="btn" target="_blank" rel="noopener" href="'+esc(gcalUrl(p))+'">'+svg('<path d="M4 5h16v16H4zM4 10h16M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/>')+'Google Calendar</a>':'')+'</div></div></div>';
+   '<button class="btn" data-act="docs" data-id="'+esc(p.id)+'">'+svg('<path d="M6 3h8l5 5v13H6zM14 3v5h5"/>')+'Dokumen</button>'+(p.tarikh?'<a class="btn" target="_blank" rel="noopener" href="'+esc(gcalUrl(p))+'">'+svg('<path d="M4 5h16v16H4zM4 10h16M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/>')+'Google Calendar</a>':'')+'<a class="btn" target="_blank" rel="noopener" data-wa="1" href="'+esc(waUrl(progWaText(p)))+'">'+svg('<path d="M4 20l1.3-4.2A8 8 0 1 1 8.3 18.8z"/><path d="M9 9c0 3 3 6 6 6l1-2-2-1-1 .8c-1-.4-2-1.400-2.400-2.400L11 10l-1-2z"/>')+'WhatsApp</a></div></div></div>';
 }
 function emptyProgs(){
   return '<div class="card empty"><h3>Belum ada program</h3><p>Tambah program kokurikulum pertama, atau isi dengan data contoh untuk melihat bagaimana sistem ini berfungsi.</p>'+
@@ -1099,6 +1099,18 @@ function jbList(){
   return sorted(P);
 }
 function jbLabel(){var v=S.jb||'akan';return v==='akan'?'Program akan datang':v==='semua'?'Semua program':'Bulan '+MONF[(+v)-1]}
+function waUrl(t){return 'https://wa.me/?text='+encodeURIComponent(t)}
+function progWaText(p){
+  var g=pgrOf(p),t='*'+p.nama+'*\n'+BRAND.nama+'\n\n';
+  t+='Tarikh: '+range(p)+'\n';
+  if(p.masaMula)t+='Masa: '+timeRange(p)+'\n';
+  t+='Tempat: '+(p.tempat||'akan dimaklumkan')+'\n';
+  if(p.unit)t+='Unit: '+p.unit+'\n';
+  if(p.pic)t+='PIC: '+p.pic+'\n';
+  if(g.length)t+='Guru pengiring: '+g.join(', ')+'\n';
+  if(p.catatan)t+='\nCatatan: '+p.catatan+'\n';
+  return t+'\nSila maklumkan jika ada kekangan. Terima kasih.';
+}
 function jbText(){
   var L=jbList(),t='*JADUAL GURU PENGIRING*\n'+BRAND.nama+' · '+curYear()+' · '+jbLabel()+'\n';
   if(!L.length)return t+'\n(Tiada program)';
@@ -1116,7 +1128,7 @@ function jadual(){
   var opts=[['akan','Program akan datang'],['semua','Semua program tahun '+curYear()]].concat(MONF.map(function(m,i){return [String(i+1),m]}));
   openModal('<div class="mh"><div><h2>Jadual guru pengiring</h2><small style="color:var(--muted)">'+esc(BRAND.nama)+' · '+esc(curYear())+'</small></div><button type="button" class="mx" data-act="close" aria-label="Tutup">×</button></div>'+
    '<div class="mb"><div style="grid-column:1/-1"><select class="inline" id="jbSel" aria-label="Pilih senarai jadual">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(String(S.jb||'akan')===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select>'+jbTable('jtab')+'</div></div>'+
-   '<div class="mf"><button type="button" class="btn" data-act="close">Tutup</button><button type="button" class="btn" data-act="jbcopy">'+svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>')+'Salin teks</button><button type="button" class="btn pri" data-act="jbprint">'+svg('<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/>')+'Cetak</button></div>',false);
+   '<div class="mf"><button type="button" class="btn" data-act="close">Tutup</button><button type="button" class="btn" data-act="jbcopy">'+svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>')+'Salin teks</button><a class="btn" target="_blank" rel="noopener" href="'+esc(waUrl(jbText()))+'">'+svg('<path d="M4 20l1.3-4.2A8 8 0 1 1 8.3 18.8z"/><path d="M9 9c0 3 3 6 6 6l1-2-2-1-1 .8c-1-.4-2-1.400-2.400-2.400L11 10l-1-2z"/>')+'WhatsApp</a><button type="button" class="btn pri" data-act="jbprint">'+svg('<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/>')+'Cetak</button></div>',false);
 }
 function jbPrint(){
   printHtml('<h1>JADUAL GURU PENGIRING</h1><p class="psub">'+esc(BRAND.penuh)+' · '+esc(curYear())+' · '+esc(jbLabel())+'</p>'+jbTable('')+
