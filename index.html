@@ -1101,15 +1101,16 @@ function jbList(){
 function jbLabel(){var v=S.jb||'akan';return v==='akan'?'Program akan datang':v==='semua'?'Semua program':'Bulan '+MONF[(+v)-1]}
 function waUrl(t){return 'https://wa.me/?text='+encodeURIComponent(t)}
 function progWaText(p){
-  var g=pgrOf(p),t='*'+p.nama+'*\n'+BRAND.nama+'\n\n';
-  t+='Tarikh: '+range(p)+'\n';
-  if(p.masaMula)t+='Masa: '+timeRange(p)+'\n';
-  t+='Tempat: '+(p.tempat||'akan dimaklumkan')+'\n';
-  if(p.unit)t+='Unit: '+p.unit+'\n';
-  if(p.pic)t+='PIC: '+p.pic+'\n';
-  if(g.length)t+='Guru pengiring: '+g.join(', ')+'\n';
-  if(p.catatan)t+='\nCatatan: '+p.catatan+'\n';
-  return t+'\nSila maklumkan jika ada kekangan. Terima kasih.';
+  var g=pgrOf(p).map(tcase),t='\ud83d\udccc *'+p.nama+'*\n'+BRAND.nama+'\n\n';
+  t+='\ud83d\udcc5 *Tarikh:* '+range(p)+'\n';
+  if(p.masaMula)t+='\ud83d\udd52 *Masa:* '+timeRange(p)+'\n';
+  t+='\ud83d\udccd *Tempat:* '+(p.tempat||'akan dimaklumkan')+'\n';
+  if(p.unit)t+='\ud83c\udff7\ufe0f *Unit:* '+p.unit+'\n';
+  if(p.pic||g.length)t+='\n';
+  if(p.pic)t+='\ud83d\udc64 *PIC:* '+tcase(p.pic)+'\n';
+  if(g.length)t+='\ud83d\udc65 *Guru pengiring:* '+g.join(', ')+'\n';
+  if(p.catatan)t+='\n\ud83d\udcdd *Catatan:* '+p.catatan+'\n';
+  return t+'\n_Sila maklumkan jika ada kekangan. Terima kasih._';
 }
 function jbText(){
   var L=jbList(),t='*JADUAL GURU PENGIRING*\n'+BRAND.nama+' · '+curYear()+' · '+jbLabel()+'\n';
