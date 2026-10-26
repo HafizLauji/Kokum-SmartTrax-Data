@@ -373,8 +373,8 @@ tr:last-child td{border-bottom:0}
 .stack>.card.chart svg{max-height:280px}
 .pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0}
 .mini{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:2px}
-.unk{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.unk .btn{padding:6px 11px;font-size:12.5px}
+.unk,.mailnk{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.unk .btn,.mailnk .btn{padding:6px 11px;font-size:12.5px}
 .mtab td,.mtab th{white-space:nowrap}
 .mtab td.wrap{white-space:normal;min-width:160px}
 
@@ -1029,7 +1029,7 @@ function vProgram(){
 }
 function vWarga(){
   var rows=S.guru.slice().sort(function(a,b){return a.nama.localeCompare(b.nama)});
-  var unk=unknownPics(),ada=rows.filter(function(g){return picProgs(g).length}).length;
+  var unk=unknownPics(),ada=rows.filter(function(g){return picProgs(g).length}).length,noMail=rows.filter(function(g){return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(g.emel||'').trim())});
   var stat=function(col,ci,ic,n,l,sub){return '<div class="stat" style="--c:var(--'+col+');--ci:var(--'+ci+')"><div class="ic">'+svg(ic)+'</div><div><b>'+n+'</b><span>'+l+'</span><small>'+sub+'</small></div></div>'};
   var head='<div class="pagehead"><div><h1>Warga Kokum</h1><p>Guru penasihat dan pegawai penyelaras unit kokurikulum</p></div><button class="btn pri" data-act="newguru">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah warga</button></div>';
   if(!rows.length&&!unk.length)return head+'<div class="card empty"><h3>Belum ada warga kokum</h3><p>Tambah guru penasihat supaya nama mereka boleh dipilih sebagai PIC program.</p></div>';
@@ -1052,6 +1052,7 @@ function vWarga(){
     stat('green','green-ink','<path d="m5 12 5 5 9-10"/>',ada,'Ada tugasan PIC','Memegang sekurang-kurangnya satu program')+
     stat('amber','amber-ink','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',rows.length-ada,'Belum ada tugasan','Belum jadi PIC mana-mana program')+'</section>':'')+
    (unk.length?'<div class="card" style="margin-bottom:14px"><h3><i>'+svg('<path d="M12 4 3 20h18zM12 10v5M12 17.5h.01"/>')+'</i>Nama PIC belum ada dalam senarai warga</h3><p style="color:var(--muted);font-size:13px">Nama ini digunakan sebagai PIC dalam program tetapi belum didaftarkan di sini. Tekan nama untuk menambahnya.</p><div class="unk">'+unk.map(function(n){return '<button class="btn" data-act="addpic" data-n="'+esc(n)+'">'+svg('<path d="M12 5v14M5 12h14"/>')+esc(n)+'</button>'}).join('')+'</div></div>':'')+
+   ((!S.ro&&rows.length&&noMail.length)?'<div class="card" style="margin-bottom:14px"><h3><i>'+svg('<path d="M4 6h16v12H4zM4 7l8 6 8-6"/>')+'</i>'+noMail.length+' guru belum ada e-mel</h3><p style="color:var(--muted);font-size:13px">Peringatan program (2 hari sebelum) hanya dihantar kepada guru yang ada e-mel. Tekan nama untuk mengisinya.</p><div class="mailnk">'+noMail.slice(0,12).map(function(g){return '<button class="btn" data-act="editguru" data-id="'+esc(g.id)+'">'+esc(g.nama)+'</button>'}).join('')+(noMail.length>12?'<span class="mini">dan '+(noMail.length-12)+' lagi</span>':'')+'</div></div>':'')+
    (rows.length?'<div class="filters">'+chips.map(function(c){return '<button class="fchip" data-act="gwkat" data-v="'+c[0]+'" aria-pressed="'+(S.gwKat===c[0])+'">'+esc(c[1])+' <span class="gcnt">'+c[2]+'</span></button>'}).join('')+
     (names.length&&S.gwKat!=='tiada'?'<select class="inline" id="gwNama" aria-label="Tapis unit, kelab atau sukan"><option value="">Semua unit / kelab / sukan</option>'+names.map(function(n){return '<option'+(S.gwNama.toLowerCase()===n.toLowerCase()?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select>':'')+'</div>'+
     '<div class="gview" role="group" aria-label="Cara paparan">'+views.map(function(v){return '<button class="fchip" data-act="gwview" data-v="'+v[0]+'" aria-pressed="'+(S.gwView===v[0])+'">'+v[1]+'</button>'}).join('')+'</div>'+body:'');
@@ -1856,6 +1857,9 @@ function vTetapan(){
    '<label for="c5">Kumpulan cuti sekolah<select id="c5" name="kumpulan"><option value="B"'+(kumpulan()==='B'?' selected':'')+'>Kumpulan B (termasuk Sabah)</option><option value="A"'+(kumpulan()==='A'?' selected':'')+'>Kumpulan A (Kedah, Kelantan, Terengganu)</option></select></label>'+
    '<label for="c6" class="full">Cuti terbina 2027 (cuti umum, cuti negeri dan cuti penggal)<select id="c6" name="cutiBina"><option value="hidup"'+(String(c.cutiBina)!=='mati'?' selected':'')+'>Hidup: papar dan beri amaran bertindih</option><option value="mati"'+(String(c.cutiBina)==='mati'?' selected':'')+'>Mati: guna senarai sendiri sahaja</option></select></label></div>'+
    '<div class="btns" style="margin-top:14px"><button class="btn pri" type="submit">Simpan tetapan</button></div></form>'+
+  '<div class="card" style="max-width:640px;margin-top:14px"><h3>Peringatan e-mel kepada guru</h3>'+
+   '<p style="color:var(--muted);font-size:13px;margin-bottom:8px">Setiap pagi sistem menghantar e-mel peringatan kepada semua guru yang ada e-mel, <b>2 hari sebelum</b> program bermula, lengkap dengan tarikh, tempat, PIC dan guru pengiring. Penerima tidak nampak e-mel satu sama lain.</p>'+
+   '<p style="color:var(--muted);font-size:13px"><b>'+S.guru.filter(function(g){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(g.emel||'').trim())}).length+'</b> daripada '+S.guru.length+' guru sudah ada e-mel. Hidupkan penjadual sekali dalam Apps Script dengan menjalankan <code>ujiPeringatan</code>, kemudian <code>pasangPeringatan</code>.</p></div>'+
   '<div class="card" style="max-width:640px;margin-top:14px"><h3>Data dan akses</h3>'+
    '<p style="color:var(--muted);font-size:13px;margin-bottom:10px">Sandaran ialah salinan semua program, warga kokum dan tetapan dalam satu fail. Gambar dan PDF kekal selamat dalam Google Drive awak.</p>'+
    '<div class="btns"><button class="btn" data-act="backup">'+svg('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>')+'Muat turun sandaran data</button><button class="btn" data-act="kod">'+svg('<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>')+'Tukar kod akses pada peranti ini</button></div></div>';
@@ -1916,10 +1920,10 @@ function guruForm(g){
    extra:'<datalist id="jawlist">'+JAWATAN.map(function(j){return '<option value="'+esc(j)+'">'}).join('')+'</datalist>'+pjDL('gpNama',gOpts(''))+pjDL('gpJaw',GJAW)+
     '<div class="fotoedit"><span id="gfotoPrev">'+avHtml({nama:g.nama,foto:S.gfoto},72)+'</span><div><div class="btns"><label class="btn" for="gFoto" style="cursor:pointer;margin:0">'+svg('<path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>')+'Pilih gambar</label><button type="button" class="btn" data-act="gfotodel"'+(S.gfoto?'':' hidden')+' id="gfotoDel">Buang gambar</button></div><input id="gFoto" type="file" accept="image/*" hidden><small style="display:block;color:var(--muted);font-size:12px;margin-top:6px">Selepas pilih, anda boleh seret dan zum untuk susun muka.</small></div></div><div class="fotocrop" id="fotoCrop" hidden></div>'+
     '<fieldset class="prbox"><legend>Peranan (unit, kelab, sukan)</legend><div id="prList">'+pr.map(prRow).join('')+'</div><button type="button" class="btn" data-act="pradd">'+svg('<path d="M12 5v14M5 12h14"/>')+'Tambah peranan</button><small>Contoh: Guru Penasihat · Badminton. Satu guru boleh ada banyak peranan.</small></fieldset>',
-   fields:[{k:'nama',l:'Nama',req:1,full:1},{k:'jawatan',l:'Jawatan',full:1,list:'jawlist'},{k:'unit',l:'Unit',full:1,t:'select',o:[['','Semua unit']].concat(UNITS.map(function(u){return [u,u]}))}],
+   fields:[{k:'nama',l:'Nama',req:1,full:1},{k:'jawatan',l:'Jawatan',full:1,list:'jawlist'},{k:'emel',l:'E-mel (untuk peringatan program)',t:'email',full:1},{k:'unit',l:'Unit',full:1,t:'select',o:[['','Semua unit']].concat(UNITS.map(function(u){return [u,u]}))}],
    onDelete:isNew?null:function(){del('guru',g.id).then(function(){closeModal();toast('Dipadam')})},
    onSave:function(v){
-     var rec={nama:v.nama,jawatan:v.jawatan,unit:v.unit,peranan:prRead(),foto:S.gfoto||''};
+     var rec={nama:v.nama,jawatan:v.jawatan,unit:v.unit,emel:String(v.emel||'').trim().toLowerCase(),peranan:prRead(),foto:S.gfoto||''};
      put('guru',g.id||newId('g'),rec).then(function(){closeModal();toast('Disimpan')})}});
 }
 function showDetail(id){var p=byId(id);if(!p)return;S.mdetail=id;openModal('<div class="mh"><h2>Maklumat program</h2><button type="button" class="mx" data-act="close" aria-label="Tutup">×</button></div>'+detail(p));}
