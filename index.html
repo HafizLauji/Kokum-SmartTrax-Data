@@ -1640,11 +1640,13 @@ function pjBulk(){
 }
 
 /* ---------- Ahli Unit: senarai ahli, jawatankuasa dan carta ---------- */
-var AU_SLOT={uni:['Ketua','Penolong Ketua','Setiausaha','Bendahari'],klb:['Pengerusi','Naib Pengerusi','Setiausaha','Bendahari'],spt:['Kapten','Naib Kapten','Setiausaha','Bendahari']};
-var AU_UTAMA=['Pengerusi','Naib Pengerusi','Ketua','Penolong Ketua','Kapten','Naib Kapten','Setiausaha','Penolong Setiausaha','Bendahari'];
+var AU_GRP=[['Pengerusi','Ketua'],['Naib Pengerusi','Penolong Ketua','Naib Ketua'],['Kapten'],['Naib Kapten'],['Setiausaha'],['Penolong Setiausaha'],['Bendahari']];
+var AU_SLOT={uni:[0,1,4,6],klb:[0,1,4,6],spt:[2,3,4,6]};
+function auGi(j){var k=auN(j);for(var i=0;i<AU_GRP.length;i++)if(AU_GRP[i].map(auN).indexOf(k)>=0)return i;return -1}
+function auGl(i){return AU_GRP[i].slice(0,2).join(' / ')}
 var AU_KAT=[['uni','Beruniform'],['klb','Kelab'],['spt','Sukan']];
 function auN(x){return String(x||'').trim().toLowerCase()}
-function auUtamaIdx(j){return AU_UTAMA.map(auN).indexOf(auN(j))}
+function auUtamaIdx(j){return auGi(j)}
 function auMem(kat,unit){
   var y=curYear(),f=PJ_FLD[kat],k=auN(unit);
   return pjList().filter(function(m){return auN(pjRec(m,y)[f[0]])===k}).map(function(m){var r=pjRec(m,y);return {m:m,lv:pjLevel(m,y),kelas:String(r.kelas||''),j:String(r[f[1]]||'').trim()}});
@@ -1685,9 +1687,9 @@ function auTxt(kat,unit){
 }
 function auCarta(kat,unit){
   var L=auMem(kat,unit),P=auSplit(L),G=auGuru(kat,unit),sl=AU_SLOT[kat].slice();
-  P.ut.forEach(function(x){if(sl.map(auN).indexOf(auN(x.j))<0)sl.push(x.j)});
-  var box=function(j){var n=P.ut.filter(function(x){return auN(x.j)===auN(j)});
-    return '<div class="cbox"><b>'+esc(String(j).toUpperCase())+'</b><span>'+(n.length?n.map(function(x){return esc(x.m.nama)}).join('<br>'):'BELUM DILANTIK')+'</span></div>'};
+  P.ut.forEach(function(x){var g=auGi(x.j);if(sl.indexOf(g)<0)sl.push(g)});sl.sort(function(a,b){return a-b});
+  var box=function(g){var n=P.ut.filter(function(x){return auGi(x.j)===g});
+    return '<div class="cbox"><b>'+esc(auGl(g).toUpperCase())+'</b><span>'+(n.length?n.map(function(x){return esc(x.m.nama)}).join('<br>'):'BELUM DILANTIK')+'</span></div>'};
   var rows=function(a){return a.map(function(x,i){return '<tr><td style="width:7%">'+(i+1)+'</td><td>'+esc(x.m.nama)+'</td><td style="width:14%">Tahun '+x.lv+'</td><td style="width:20%">'+esc(x.kelas.replace(/^\s*\d+\s*/,''))+'</td>'+(a===P.ajk?'<td style="width:18%">'+esc(x.j)+'</td>':'')+'</tr>'}).join('')};
   return '<div class="pg"><h1>'+esc(BRAND.penuh.toUpperCase())+'</h1><p class="psub"><b>CARTA JAWATANKUASA MURID</b><br>'+esc(unit.toUpperCase())+' · '+esc(auKatNama(kat).toUpperCase())+' · SESI '+esc(curYear())+'</p>'+
    '<h2>Guru penasihat</h2>'+(G.length?'<table><tbody>'+G.map(function(g,i){return '<tr><td style="width:7%">'+(i+1)+'</td><td>'+esc(g.nama)+'</td><td style="width:34%">'+esc(g.jawatan||'Guru penasihat')+'</td></tr>'}).join('')+'</tbody></table>':'<p>Belum ditetapkan.</p>')+
