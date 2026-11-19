@@ -611,13 +611,13 @@ var MONF=['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','Septemb
 var DOW=['Isn','Sel','Rab','Kha','Jum','Sab','Ahd'];
 var ST={berlangsung:'Sedang Berjalan',akan:'Akan Datang',perancangan:'Perancangan',selesai:'Selesai'};
 var RANK={berlangsung:0,akan:1,perancangan:2,selesai:3};
-var UNITS=['Unit Sukan & Permainan','Unit Beruniform','Unit Kelab & Persatuan','Unit Koakademik','Unit Kebudayaan'];
+var UNITS=['Unit Sukan & Permainan','Unit Beruniform','Unit Kelab & Persatuan'];
+var UNIT_ALIH={'unit koakademik':'Unit Kelab & Persatuan','unit kebudayaan':'Unit Kelab & Persatuan'};
+var KLB_ALIAS={'kelab bahasa inggeris':'Persatuan Bahasa Inggeris','kelab bahasa inggris':'Persatuan Bahasa Inggeris','persatuan bahasa inggris':'Persatuan Bahasa Inggeris','kelab spbt':'Kelab Skim Pinjaman Buku Teks','spbt':'Kelab Skim Pinjaman Buku Teks','skim pinjaman buku teks':'Kelab Skim Pinjaman Buku Teks','persatuan spbt':'Kelab Skim Pinjaman Buku Teks'};
 var UNITSTYLE={
  'Unit Sukan & Permainan':{a:'#2f9e6b',b:'#d9a62e',i:'ball'},
  'Unit Beruniform':{a:'#d9672e',b:'#8e2a54',i:'tent'},
- 'Unit Kelab & Persatuan':{a:'#3a6fd8',b:'#7c5cf0',i:'bot'},
- 'Unit Koakademik':{a:'#1ea5b8',b:'#2f6fd8',i:'wave'},
- 'Unit Kebudayaan':{a:'#b4233f',b:'#e8a23a',i:'drum'}};
+ 'Unit Kelab & Persatuan':{a:'#3a6fd8',b:'#7c5cf0',i:'bot'}};
 var DOCS=[['kk','Kertas kerja'],['kb','Surat kebenaran ibu bapa'],['hd','Senarai hadir'],['gb','Gambar program'],['lp','Laporan program']];
 var PATHS={
  ball:'<circle cx="24" cy="24" r="16"/><path d="M24 8v8l-7 5 3 9h8l3-9-7-5M17 21l-9 3M31 21l9 3M20 30l-4 9M28 30l4 9"/>',
@@ -646,9 +646,9 @@ var SAMPLE={
   {id:'p1',nama:'Hari Sukan Negara',unit:'Unit Sukan & Permainan',tempat:'Padang SKGG',tarikh:'2026-10-10',tarikhTamat:'',masaMula:'07:30',masaTamat:'13:00',murid:320,guru:18,pic:'Guru Contoh B',status:'berlangsung',catatan:'Program berjalan lancar. Semua murid aktif dan memberikan kerjasama yang baik.',dok:{kk:true,kb:true,hd:true}},
   {id:'p2',nama:'Perkhemahan Kokurikulum',unit:'Unit Beruniform',tempat:'Khemah SKGG',tarikh:'2026-10-22',tarikhTamat:'2026-10-24',masaMula:'15:00',masaTamat:'11:00',murid:150,guru:25,pic:'',status:'akan',catatan:'',dok:{kk:true}},
   {id:'p3',nama:'Pertandingan STEM Kokurikulum',unit:'Unit Kelab & Persatuan',tempat:'Dewan SKGG',tarikh:'2026-11-05',tarikhTamat:'',masaMula:'08:00',masaTamat:'12:30',murid:80,guru:12,pic:'',status:'perancangan',catatan:'',dok:{}},
-  {id:'p4',nama:'Program Cintai Alam',unit:'Unit Koakademik',tempat:'Pesisir Pantai',tarikh:'2026-09-20',tarikhTamat:'',masaMula:'08:00',masaTamat:'12:00',murid:120,guru:15,pic:'',status:'selesai',catatan:'',dok:{kk:true,kb:true,hd:true,gb:true,lp:true}},
+  {id:'p4',nama:'Program Cintai Alam',unit:'Unit Kelab & Persatuan',tempat:'Pesisir Pantai',tarikh:'2026-09-20',tarikhTamat:'',masaMula:'08:00',masaTamat:'12:00',murid:120,guru:15,pic:'',status:'selesai',catatan:'',dok:{kk:true,kb:true,hd:true,gb:true,lp:true}},
   {id:'p5',nama:'Latihan Ikatan & Simpulan',unit:'Unit Beruniform',tempat:'Tapak Perkhemahan',tarikh:'2026-08-15',tarikhTamat:'',masaMula:'08:00',masaTamat:'11:30',murid:60,guru:8,pic:'',status:'selesai',catatan:'',dok:{kk:true,hd:true,lp:true}},
-  {id:'p6',nama:'Malam Kebudayaan',unit:'Unit Kebudayaan',tempat:'Dewan SKGG',tarikh:'2026-07-12',tarikhTamat:'',masaMula:'19:30',masaTamat:'22:00',murid:180,guru:20,pic:'',status:'selesai',catatan:'',dok:{kk:true,kb:true,hd:true,gb:true,lp:true}},
+  {id:'p6',nama:'Malam Kebudayaan',unit:'Unit Kelab & Persatuan',tempat:'Dewan SKGG',tarikh:'2026-07-12',tarikhTamat:'',masaMula:'19:30',masaTamat:'22:00',murid:180,guru:20,pic:'',status:'selesai',catatan:'',dok:{kk:true,kb:true,hd:true,gb:true,lp:true}},
   {id:'p7',nama:'Kejohanan Olahraga Sekolah',unit:'Unit Sukan & Permainan',tempat:'Padang SKGG',tarikh:'2026-03-14',tarikhTamat:'',masaMula:'07:30',masaTamat:'13:00',murid:300,guru:22,pic:'',status:'selesai',catatan:'',dok:{kk:true,kb:true,hd:true,gb:true,lp:true}},
   {id:'p8',nama:'Hari Kelab dan Persatuan',unit:'Unit Kelab & Persatuan',tempat:'Dewan SKGG',tarikh:'2026-05-09',tarikhTamat:'',masaMula:'08:00',masaTamat:'12:00',murid:210,guru:14,pic:'',status:'selesai',catatan:'',dok:{kk:true,hd:true,lp:true}},
   {id:'p9',nama:'Kem Kepimpinan Pengawas',unit:'Unit Beruniform',tempat:'Dewan SKGG',tarikh:'2026-02-21',tarikhTamat:'',masaMula:'08:00',masaTamat:'16:00',murid:45,guru:6,pic:'',status:'selesai',catatan:'',dok:{kk:true,kb:true,hd:true,lp:true}}],
@@ -740,13 +740,22 @@ function load(quiet){
   api().then(function(r){
     if(!r||!r.ok){if(r&&r.error==='kod'){askKod();return}throw new Error((r&&r.error)||'ralat')}
     S.programs=r.programs||[];S.guru=r.guru||[];S.pajsk=r.pajsk||[];S.pajskOff=(r.pajsk===undefined);S.pencapaian=r.pencapaian||[];S.pcOff=(r.pencapaian===undefined);S.ro=(r.role==='baca');S.hide=r.sembunyi||[];document.body.classList.toggle('ro',S.ro);S.config=Object.assign({},SAMPLE.config,r.config||{});
-    S.loaded={p:true,g:true,c:true};S.err=null;fixSel();render();
+    S.loaded={p:true,g:true,c:true};S.err=null;normData();fixSel();render();
     if(!S.ro&&!namaOleh()&&!S.namaAsked&&!S.lock){S.namaAsked=1;askNama(false)}
   }).catch(function(e){
     if(!quiet){S.err='Tidak dapat berhubung dengan Google Sheets. Semak URL Web App dan sambungan internet.';S.loaded={p:true,g:true,c:true};render()}
   });
 }
 
+function klbCanon(n){var k=String(n||'').trim().toLowerCase().replace(/\s+/g,' ');return KLB_ALIAS[k]||String(n||'').trim()}
+/* Seragamkan nama unit/kelab yang bertindih. Dilakukan dalam ingatan semasa muat; butang di Tetapan menyimpannya ke Sheet. */
+function normData(){
+  S.normP=[];S.normM=[];
+  S.programs.forEach(function(p){var u=UNIT_ALIH[String(p.unit||'').trim().toLowerCase()];if(u){p.unit=u;S.normP.push(p.id)}});
+  S.guru.forEach(function(g){var u=UNIT_ALIH[String(g.unit||'').trim().toLowerCase()];if(u)g.unit=u;
+    if(Array.isArray(g.peranan))g.peranan.forEach(function(r){if(r&&r.kat==='klb')r.nama=klbCanon(r.nama)})});
+  S.pajsk.forEach(function(m){var ch=false;Object.keys(m.rekod||{}).forEach(function(y){var r=m.rekod[y];if(r&&typeof r==='object'&&r.klb){var c=klbCanon(r.klb);if(c!==r.klb){r.klb=c;ch=true}}});if(ch)S.normM.push(m.id)});
+}
 function askNama(cancel){
   openModal('<form id="namaForm"><div class="mh"><h2>Siapa anda?</h2>'+(cancel?'<button type="button" class="mx" data-act="close" aria-label="Tutup">×</button>':'')+'</div><div class="mb"><label class="full" for="namaIn">Nama anda (disimpan dalam log perubahan supaya guru lain tahu siapa yang mengubah data)<input id="namaIn" name="nama" maxlength="40" required value="'+esc(namaOleh())+'" autocomplete="name"></label></div><div class="mf"><button type="button" class="btn" data-act="'+(cancel?'close':'namalain')+'">'+(cancel?'Batal':'Lain kali')+'</button><button class="btn pri" type="submit">Simpan</button></div></form>',true);
   setTimeout(function(){var n=document.getElementById('namaIn');if(n)n.focus()},50);
@@ -1459,7 +1468,7 @@ var PJ_CAPAI=['Johan','Naib Johan','Tempat Ketiga','Tempat Keempat','Emas','Pera
 var PJ_JAWATAN=['Pengerusi','Naib Pengerusi','Ketua','Penolong Ketua','Setiausaha','Penolong Setiausaha','Bendahari','Kapten','Naib Kapten','AJK','Ahli'];
 var PJ_DEF={
  uni:['Pengakap','Pandu Puteri','Kadet Polis','Kadet Bomba dan Penyelamat','Kadet Remaja Sekolah','Persatuan Bulan Sabit Merah','Puteri Islam','St. John Ambulance','Pengawas'],
- klb:['Kelab Bahasa Melayu','Persatuan Bahasa Inggeris','Persatuan Bahasa Arab','Kelab Sains dan Matematik','Persatuan Agama Islam','Kelab Seni','Kelab Komputer','Kelab Pencinta Alam'],
+ klb:['Kelab Bahasa Melayu','Persatuan Bahasa Inggeris','Persatuan Bahasa Arab','Kelab Skim Pinjaman Buku Teks','Kelab Sains dan Matematik','Persatuan Agama Islam','Kelab Seni','Kelab Komputer','Kelab Pencinta Alam'],
  spt:['Bola Sepak','Bola Jaring','Olahraga','Badminton','Sepak Takraw','Bola Tampar','Bola Baling','Catur','Renang']};
 var PJ_KAT=[['uni','Beruniform'],['klb','Kelab'],['spt','Sukan'],['lain','Lain-lain']];
 var PJ_FLD={uni:['uni','jUni','Unit beruniform'],klb:['klb','jKlb','Kelab / persatuan'],spt:['spt','jSpt','Sukan / permainan']};
@@ -2010,6 +2019,7 @@ function vTetapan(){
   '<div class="card" style="max-width:640px;margin-top:14px"><h3>Peringatan e-mel kepada guru</h3>'+
    '<p style="color:var(--muted);font-size:13px;margin-bottom:8px">Setiap pagi sistem menghantar e-mel peringatan kepada semua guru yang ada e-mel, <b>2 hari sebelum</b> program bermula, lengkap dengan tarikh, tempat, PIC dan guru pengiring. Penerima tidak nampak e-mel satu sama lain.</p>'+
    '<p style="color:var(--muted);font-size:13px"><b>'+S.guru.filter(function(g){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(g.emel||'').trim())}).length+'</b> daripada '+S.guru.length+' guru sudah ada e-mel. Hidupkan penjadual sekali dalam Apps Script dengan menjalankan <code>ujiPeringatan</code>, kemudian <code>pasangPeringatan</code>.</p></div>'+
+  (S.ro||!((S.normP||[]).length+(S.normM||[]).length)?'':'<div class="card" style="max-width:640px;margin-top:14px"><h3>Seragamkan nama unit</h3><p style="color:var(--muted);font-size:13px;margin-bottom:10px">Sistem menjumpai <b>'+((S.normP||[]).length)+'</b> program dan <b>'+((S.normM||[]).length)+'</b> murid dengan nama unit atau kelab lama (cth. Unit Koakademik, Unit Kebudayaan, Kelab Bahasa Inggeris, Kelab SPBT). Paparan sudah digabungkan; tekan butang ini untuk menyimpannya terus ke Google Sheet.</p><div class="btns"><button class="btn pri" data-act="normsave">Simpan penyeragaman</button></div></div>')+
   (S.ro?'':'<div class="card" style="max-width:640px;margin-top:14px"><h3>Log perubahan</h3><p style="color:var(--muted);font-size:13px;margin-bottom:10px">Setiap simpan, padam atau muat naik direkod dengan nama dan masa. Nama anda pada peranti ini: <b>'+esc(namaOleh()||'belum ditetapkan')+'</b>.</p><div class="btns"><button class="btn" data-act="logbuka">Lihat log perubahan</button><button class="btn" data-act="lognama">Tukar nama saya</button></div></div>')+
   '<div class="card" style="max-width:640px;margin-top:14px"><h3>Data dan akses</h3>'+
    '<p style="color:var(--muted);font-size:13px;margin-bottom:10px">Sandaran ialah salinan semua program, warga kokum dan tetapan dalam satu fail. Gambar dan PDF kekal selamat dalam Google Drive awak.</p>'+
@@ -2123,6 +2133,11 @@ document.addEventListener('click',function(e){
   else if(a==='auprintall'){var uu=auUnits(S.auK).filter(function(u){return u.c>0});if(!uu.length)toast('Tiada unit untuk dicetak');else printHtml(uu.map(function(u){return auCarta(S.auK,u.n)}).join(''))}
   else if(a==='aucopy'){if(S.auN)copyText(auTxt(S.auK,S.auN),'Senarai disalin')}
   else if(a==='aucsv'){if(S.auN)auCsv(S.auK,S.auN)}
+  else if(a==='normsave'){
+    var ps=(S.normP||[]).map(function(id){return byId(id)}).filter(Boolean),ms=(S.normM||[]).map(function(id){return pjBy(id)}).filter(Boolean);
+    var jobs=ps.map(function(p){var o=Object.assign({},p);delete o.id;return put('programs',p.id,o)});
+    if(ms.length)jobs.push(putMany('pajsk',ms.map(function(m){return {id:m.id,data:{nama:m.nama,mula:m.mula,rekod:m.rekod||{},jantina:m.jantina||''}}})));
+    Promise.all(jobs).then(function(){S.normP=[];S.normM=[];toast('Nama unit diseragamkan');render()}).catch(function(){toast('Gagal menyimpan, cuba lagi')})}
   else if(a==='lognama')askNama(true);
   else if(a==='logbuka')logBuka();
   else if(a==='namalain')closeModal();
