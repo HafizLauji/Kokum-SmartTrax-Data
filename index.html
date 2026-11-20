@@ -825,7 +825,10 @@ function covCfg(p){var c=p&&p.dok&&p.dok.cv;return c&&typeof c==='object'?c:null
 function coverImg(p){var c=covCfg(p),m=c&&failOf(p).filter(function(f){return f.jenis==='gambar'&&(f.tid||f.fid)&&f.id===c.e})[0];return m||firstImg(p)}
 function covStyle(c){c=c||{};var x=c.x==null?50:+c.x,y=c.y==null?50:+c.y,z=+c.z||1;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')'}
 function sizeTxt(n){n=+n||0;return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
-function thumbImg(p){var im=coverImg(p),c=covCfg(p);return im?'<img class="cover" alt="" style="'+covStyle(c&&c.e===im.id?c:null)+'" data-img="'+esc(im.tid||im.fid)+'">':''}
+function coverPair(im,st){var lo=im.tid||im.fid,h='<img class="cover" alt="" style="'+st+'" data-img="'+esc(lo)+'">';
+  /* lapisan kedua: gambar penuh (1600px) menimpa gambar kecil sebaik siap dimuat, supaya kad tidak pecah */
+  if(im.fid&&im.fid!==lo)h+='<img class="cover" alt="" style="'+st+'" data-img="'+esc(im.fid)+'">';return h}
+function thumbImg(p){var im=coverImg(p),c=covCfg(p);return im?coverPair(im,covStyle(c&&c.e===im.id?c:null)):''}
 function getFile(id){
   if(!hasApi())return Promise.reject(new Error('mod contoh'));
   return fetch(API_URL+'?action=file&id='+encodeURIComponent(id)+'&kod='+encodeURIComponent(kod())).then(function(r){return r.json()}).then(chk);
@@ -893,12 +896,12 @@ function covAdj(id){
   S.mdetail=null;
   openModal('<div class="mh"><h2>Susun muka depan program</h2><button type="button" class="mx" data-act="cvno" aria-label="Tutup">×</button></div>'+
    '<div class="mb"><div style="grid-column:1/-1"><small style="color:var(--muted);display:block;margin-bottom:8px">'+esc(p.nama)+'. Seret gambar, atau guna butang anak panah dan zum untuk pilih bahagian yang mahu dipaparkan pada kad program.</small>'+
-   '<div class="cvfr" id="cvFrame"><img id="cvImg" alt="" data-img="'+esc(im.tid||im.fid)+'" style="'+covStyle(S.cv)+'"></div>'+
+   '<div class="cvfr" id="cvFrame">'+coverPair(im,covStyle(S.cv))+'</div>'+
    '<div class="cvctl"><div class="dpad" role="group" aria-label="Gerakkan gambar"><span></span><button type="button" class="btn" data-act="cvmv" data-dx="0" data-dy="-1" aria-label="Gerak ke atas">▲</button><span></span><button type="button" class="btn" data-act="cvmv" data-dx="-1" data-dy="0" aria-label="Gerak ke kiri">◀</button><button type="button" class="btn" data-act="cvreset" aria-label="Set semula" title="Set semula">⟲</button><button type="button" class="btn" data-act="cvmv" data-dx="1" data-dy="0" aria-label="Gerak ke kanan">▶</button><span></span><button type="button" class="btn" data-act="cvmv" data-dx="0" data-dy="1" aria-label="Gerak ke bawah">▼</button><span></span></div>'+
    '<div class="zrow"><button type="button" class="btn" data-act="cvzm" data-d="-1" aria-label="Zum keluar">−</button><input id="cvZ" type="range" min="1" max="3" step="0.01" value="'+S.cv.z+'" aria-label="Zum"><button type="button" class="btn" data-act="cvzm" data-d="1" aria-label="Zum masuk">+</button></div></div></div></div>'+
    '<div class="mf"><button type="button" class="btn" data-act="cvno">Batal</button><button type="button" class="btn pri" data-act="cvsave">Simpan muka depan</button></div>',true);
 }
-function cvApply(){var im=document.getElementById('cvImg');if(im&&S.cv)im.setAttribute('style',covStyle(S.cv));var r=document.getElementById('cvZ');if(r&&S.cv)r.value=S.cv.z}
+function cvApply(){if(S.cv)document.querySelectorAll('#cvFrame img').forEach(function(im){im.setAttribute('style',covStyle(S.cv))});var r=document.getElementById('cvZ');if(r&&S.cv)r.value=S.cv.z}
 function cvMove(dx,dy){if(!S.cv)return;var st=4;S.cv.x=Math.min(100,Math.max(0,S.cv.x-dx*st));S.cv.y=Math.min(100,Math.max(0,S.cv.y-dy*st));cvApply()}
 function cvZoom(z){if(!S.cv)return;S.cv.z=Math.min(3,Math.max(1,Math.round(z*100)/100));cvApply()}
 (function(){
