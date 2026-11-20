@@ -528,6 +528,17 @@ tr:last-child td{border-bottom:0}
 .fotocrop canvas{display:block;width:100%;height:100%}
 .fotocrop .ct{display:grid;gap:10px;min-width:180px;flex:1}
 .fotocrop .ct small{color:var(--muted);font-size:12px}
+.cvfr{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);touch-action:none;cursor:grab}
+.cvfr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.cvctl{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.gi .cvb{position:absolute;left:4px;bottom:4px;z-index:1;background:var(--violet);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;pointer-events:none}
+.gi .cvset{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.62);color:#fff;border:0;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:999px}
+.gi.iscv{outline:2px solid var(--violet)}
+.fotocrop .cropctl{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+:is(.fotocrop,.cvctl) .dpad{display:grid;grid-template-columns:repeat(3,38px);grid-auto-rows:34px;gap:4px}
+:is(.fotocrop,.cvctl) .dpad .btn,:is(.fotocrop,.cvctl) .zrow .btn{padding:0;min-width:0;justify-content:center;font-size:14px;line-height:1;touch-action:manipulation}
+:is(.fotocrop,.cvctl) .zrow{display:flex;align-items:center;gap:6px;flex:1;min-width:150px}
+:is(.fotocrop,.cvctl) .zrow .btn{width:34px;height:34px;flex:none;font-size:18px}
 .fotocrop input[type=range]{width:100%;padding:0;accent-color:var(--violet)}
 .fotocrop .btns{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -567,7 +578,7 @@ tr:last-child td{border-bottom:0}
 #pcFotoPrev .pcmedia.cir img,#pcFotoPrev .pcmedia.cir .pcph{width:72px;height:72px;border-width:3px}
 #pcFotoPrev .pcmedia.cir .pcph svg{width:30px;height:30px}
 #pcFotoPrev .pcmedia.seg{width:96px;height:72px;aspect-ratio:auto;border-radius:10px}
-body.ro :is([data-act="newprog"],[data-act="edit"],[data-act="copyprog"],[data-act="toggledone"],[data-act="setstatus"],[data-act="lampir"],[data-act="addimg"],[data-act="addpdf"],[data-act="delfile"],[data-act="seed"],[data-act="newguru"],[data-act="addpic"],[data-act="pjnew"],[data-act="pjbulk"],[data-act="pjedit"],[data-act="pjaddcap"],[data-act="pjeditcap"],[data-act="cutimgr"],[data-act="delcuti"],[data-act="pcnew"],[data-act="pcedit"]){display:none!important}
+body.ro :is([data-act="newprog"],[data-act="edit"],[data-act="copyprog"],[data-act="toggledone"],[data-act="setstatus"],[data-act="lampir"],[data-act="addimg"],[data-act="addpdf"],[data-act="delfile"],[data-act="setcover"],[data-act="coveradj"],[data-act="seed"],[data-act="newguru"],[data-act="addpic"],[data-act="pjnew"],[data-act="pjbulk"],[data-act="pjedit"],[data-act="pjaddcap"],[data-act="pjeditcap"],[data-act="cutimgr"],[data-act="delcuti"],[data-act="pcnew"],[data-act="pcedit"]){display:none!important}
 body.ro #cfgForm .btns{display:none}
 body.ro #cfgForm :is(input,select){pointer-events:none;opacity:.7}
 body.ro .gcard,body.ro .gmem{cursor:default}
@@ -700,7 +711,7 @@ function api(body){
   return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()});
 }
 var RO_MSG='Akaun ini hanya boleh melihat. Guna kod sunting untuk mengubah data.';
-var RO_ACTS={newprog:1,edit:1,copyprog:1,toggledone:1,newday:1,setstatus:1,doc:1,lampir:1,addimg:1,addpdf:1,delfile:1,seed:1,newguru:1,editguru:1,addpic:1,pjnew:1,pjbulk:1,pjedit:1,pjaddcap:1,pjeditcap:1,cutimgr:1,delcuti:1,pcnew:1,pcedit:1,pcfotodel:1,gfotodel:1,formdel:1,pradd:1,prdel:1};
+var RO_ACTS={newprog:1,edit:1,copyprog:1,toggledone:1,newday:1,setstatus:1,doc:1,lampir:1,addimg:1,addpdf:1,delfile:1,setcover:1,coveradj:1,cvsave:1,seed:1,newguru:1,editguru:1,addpic:1,pjnew:1,pjbulk:1,pjedit:1,pjaddcap:1,pjeditcap:1,cutimgr:1,delcuti:1,pcnew:1,pcedit:1,pcfotodel:1,gfotodel:1,formdel:1,pradd:1,prdel:1};
 var RO_QUIET={editguru:1,newday:1,doc:1};
 function roBlock(){toast(RO_MSG)}
 function chk(r){
@@ -810,8 +821,11 @@ function chrome(){
 var IMGC={},IMGQ=[],IMGBUSY=0,MAXPDF=6*1024*1024,PDFL=['OPR','Laporan','Kertas Kerja','Lain-lain'];
 function failOf(p){return p&&Array.isArray(p.fail)?p.fail:[]}
 function firstImg(p){return failOf(p).filter(function(f){return f.jenis==='gambar'&&(f.tid||f.fid)})[0]||null}
+function covCfg(p){var c=p&&p.dok&&p.dok.cv;return c&&typeof c==='object'?c:null}
+function coverImg(p){var c=covCfg(p),m=c&&failOf(p).filter(function(f){return f.jenis==='gambar'&&(f.tid||f.fid)&&f.id===c.e})[0];return m||firstImg(p)}
+function covStyle(c){c=c||{};var x=c.x==null?50:+c.x,y=c.y==null?50:+c.y,z=+c.z||1;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')'}
 function sizeTxt(n){n=+n||0;return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
-function thumbImg(p){var im=firstImg(p);return im?'<img class="cover" alt="" data-img="'+esc(im.tid||im.fid)+'">':''}
+function thumbImg(p){var im=coverImg(p),c=covCfg(p);return im?'<img class="cover" alt="" style="'+covStyle(c&&c.e===im.id?c:null)+'" data-img="'+esc(im.tid||im.fid)+'">':''}
 function getFile(id){
   if(!hasApi())return Promise.reject(new Error('mod contoh'));
   return fetch(API_URL+'?action=file&id='+encodeURIComponent(id)+'&kod='+encodeURIComponent(kod())).then(function(r){return r.json()}).then(chk);
@@ -844,11 +858,12 @@ function attach(p){
   var L=failOf(p),imgs=L.filter(function(f){return f.jenis==='gambar'}),pdfs=L.filter(function(f){return f.jenis==='pdf'});
   var h='<div class="att"><div class="atthead"><b>Lampiran</b><span>'+imgs.length+' gambar · '+pdfs.length+' PDF</span></div>';
   if(!hasApi())return h+'<div class="note">Muat naik fail memerlukan sambungan ke Google Sheets.</div></div>';
-  h+='<div class="btns"><button class="btn" data-act="addimg" data-id="'+esc(p.id)+'">'+svg('<path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01"/>')+'Tambah gambar</button>'+
+  h+='<div class="btns"><button class="btn" data-act="addimg" data-id="'+esc(p.id)+'">'+svg('<path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01"/>')+'Tambah gambar</button>'+(imgs.length?'<button class="btn" data-act="coveradj" data-id="'+esc(p.id)+'">Susun muka depan</button>':'')+
    '<select class="upsel" id="pdfJenis" aria-label="Jenis PDF">'+PDFL.map(function(x){return '<option'+((S.pdfJenis||'OPR')===x?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select>'+
    '<button class="btn" data-act="addpdf" data-id="'+esc(p.id)+'">'+svg('<path d="M6 3h8l5 5v13H6zM14 3v5h5M12 17v-6M9 14l3-3 3 3"/>')+'Tambah PDF</button></div>';
   if(imgs.length)h+='<div class="gal">'+imgs.map(function(f){
-    return '<div class="gi"><img alt="'+esc(f.nama)+'" data-img="'+esc(f.tid||f.fid)+'"><button class="vw" data-act="viewimg" data-id="'+esc(p.id)+'" data-eid="'+esc(f.id)+'" aria-label="Lihat gambar '+esc(f.nama)+'"></button>'+
+    var isCv=coverImg(p)&&coverImg(p).id===f.id;
+    return '<div class="gi'+(isCv?' iscv':'')+'"><img alt="'+esc(f.nama)+'" data-img="'+esc(f.tid||f.fid)+'">'+(isCv?'<span class="cvb">Muka depan</span>':'<button class="cvset" data-act="setcover" data-id="'+esc(p.id)+'" data-eid="'+esc(f.id)+'">Jadikan muka depan</button>')+'<button class="vw" data-act="viewimg" data-id="'+esc(p.id)+'" data-eid="'+esc(f.id)+'" aria-label="Lihat gambar '+esc(f.nama)+'"></button>'+
      '<button class="x" data-act="delfile" data-id="'+esc(p.id)+'" data-eid="'+esc(f.id)+'" aria-label="Padam gambar">×</button></div>'}).join('')+'</div>';
   if(pdfs.length)h+='<div class="pdfs">'+pdfs.map(function(f){
     return '<div class="pdfrow"><span class="pill" style="--c:var(--violet);--ci:var(--violet-ink)">'+esc(f.label||'PDF')+'</span><span class="nm" title="'+esc(f.nama)+'">'+esc(f.nama)+'</span><small>'+sizeTxt(f.saiz)+'</small>'+
@@ -871,6 +886,41 @@ function arkib(){
    '<p style="color:var(--muted);font-size:13px">Belum ada PDF. Buka satu program dan tekan "Tambah PDF" untuk memuat naik OPR atau laporan.</p>')+
    '<p style="color:var(--muted);font-size:12px;margin-top:8px">'+ni+' gambar aktiviti telah dimuat naik bagi tahun '+curYear()+'.</p></div>';
 }
+function covAdj(id){
+  var p=byId(id),im=p&&coverImg(p);if(!im)return;
+  var c=covCfg(p),m=c&&c.e===im.id?c:{};
+  S.cv={id:id,e:im.id,x:m.x==null?50:+m.x,y:m.y==null?50:+m.y,z:+m.z||1};
+  S.mdetail=null;
+  openModal('<div class="mh"><h2>Susun muka depan program</h2><button type="button" class="mx" data-act="cvno" aria-label="Tutup">×</button></div>'+
+   '<div class="mb"><div style="grid-column:1/-1"><small style="color:var(--muted);display:block;margin-bottom:8px">'+esc(p.nama)+'. Seret gambar, atau guna butang anak panah dan zum untuk pilih bahagian yang mahu dipaparkan pada kad program.</small>'+
+   '<div class="cvfr" id="cvFrame"><img id="cvImg" alt="" data-img="'+esc(im.tid||im.fid)+'" style="'+covStyle(S.cv)+'"></div>'+
+   '<div class="cvctl"><div class="dpad" role="group" aria-label="Gerakkan gambar"><span></span><button type="button" class="btn" data-act="cvmv" data-dx="0" data-dy="-1" aria-label="Gerak ke atas">▲</button><span></span><button type="button" class="btn" data-act="cvmv" data-dx="-1" data-dy="0" aria-label="Gerak ke kiri">◀</button><button type="button" class="btn" data-act="cvreset" aria-label="Set semula" title="Set semula">⟲</button><button type="button" class="btn" data-act="cvmv" data-dx="1" data-dy="0" aria-label="Gerak ke kanan">▶</button><span></span><button type="button" class="btn" data-act="cvmv" data-dx="0" data-dy="1" aria-label="Gerak ke bawah">▼</button><span></span></div>'+
+   '<div class="zrow"><button type="button" class="btn" data-act="cvzm" data-d="-1" aria-label="Zum keluar">−</button><input id="cvZ" type="range" min="1" max="3" step="0.01" value="'+S.cv.z+'" aria-label="Zum"><button type="button" class="btn" data-act="cvzm" data-d="1" aria-label="Zum masuk">+</button></div></div></div></div>'+
+   '<div class="mf"><button type="button" class="btn" data-act="cvno">Batal</button><button type="button" class="btn pri" data-act="cvsave">Simpan muka depan</button></div>',true);
+}
+function cvApply(){var im=document.getElementById('cvImg');if(im&&S.cv)im.setAttribute('style',covStyle(S.cv));var r=document.getElementById('cvZ');if(r&&S.cv)r.value=S.cv.z}
+function cvMove(dx,dy){if(!S.cv)return;var st=4;S.cv.x=Math.min(100,Math.max(0,S.cv.x-dx*st));S.cv.y=Math.min(100,Math.max(0,S.cv.y-dy*st));cvApply()}
+function cvZoom(z){if(!S.cv)return;S.cv.z=Math.min(3,Math.max(1,Math.round(z*100)/100));cvApply()}
+(function(){
+  var dr=null,rp1=null,rp2=null;
+  function stop(){clearTimeout(rp1);clearInterval(rp2);rp1=rp2=null;dr=null}
+  document.addEventListener('pointerdown',function(e){
+    var b=e.target.closest&&e.target.closest('[data-act="cvmv"]');
+    if(b&&S.cv){stop();b.dataset.ptr='1';cvMove(+b.dataset.dx,+b.dataset.dy);rp1=setTimeout(function(){rp2=setInterval(function(){cvMove(+b.dataset.dx,+b.dataset.dy)},55)},380);return}
+    var f=e.target.closest&&e.target.closest('#cvFrame');
+    if(f&&S.cv){var r=f.getBoundingClientRect();dr={x:e.clientX,y:e.clientY,ox:S.cv.x,oy:S.cv.y,w:r.width,h:r.height};try{f.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()}
+  });
+  document.addEventListener('pointermove',function(e){if(!dr||!S.cv)return;S.cv.x=Math.min(100,Math.max(0,dr.ox-(e.clientX-dr.x)/dr.w*100));S.cv.y=Math.min(100,Math.max(0,dr.oy-(e.clientY-dr.y)/dr.h*100));cvApply()});
+  document.addEventListener('pointerup',stop);document.addEventListener('pointercancel',stop);
+  document.addEventListener('input',function(e){if(e.target.id==='cvZ')cvZoom(+e.target.value)});
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-act="cvmv"],[data-act="cvzm"],[data-act="cvreset"]');if(!b||!S.cv)return;
+    var a=b.dataset.act;
+    if(a==='cvmv'){if(b.dataset.ptr)delete b.dataset.ptr;else cvMove(+b.dataset.dx,+b.dataset.dy)}
+    else if(a==='cvzm')cvZoom(S.cv.z+(+b.dataset.d)*.1);
+    else{S.cv.x=50;S.cv.y=50;S.cv.z=1;cvApply()}
+  });
+})();
 function refreshDetail(id){if(S.mdetail===id&&!$('#ovl').hidden)showDetail(id)}
 function shrink(file,max,q){
   return new Promise(function(res,rej){
@@ -1266,7 +1316,7 @@ function cropRedraw(){
 }
 function cropClamp(){
   var C=CROP,iw=C.im.naturalWidth*C.sc,ih=C.im.naturalHeight*C.sc;
-  C.x=Math.min(0,Math.max(C.vw-iw,C.x));C.y=Math.min(0,Math.max(C.vh-ih,C.y));
+  C.x=iw<=C.vw?(C.vw-iw)/2:Math.min(0,Math.max(C.vw-iw,C.x));C.y=ih<=C.vh?(C.vh-ih)/2:Math.min(0,Math.max(C.vh-ih,C.y));
 }
 function cropZoom(z,cx,cy){
   var C=CROP,old=C.sc,ns=C.min*z;cx=cx==null?C.vw/2:cx;cy=cy==null?C.vh/2:cy;
@@ -1282,10 +1332,13 @@ function cropOpen(file,opt){
     var w=im.naturalWidth,h=im.naturalHeight,vw=segi?240:200,vh=segi?180:200,min=Math.max(vw/w,vh/h);
     CROP={im:im,url:url,min:min,sc:min,z:1,x:0,y:0,vw:vw,vh:vh,shape:segi?'segi':'bulat',target:opt.target||'guru'};
     CROP.x=(vw-w*min)/2;CROP.y=h>w?-(h*min-vh)*.2:(vh-h*min)/2; /* potret: bingkai ke bahagian atas supaya muka tidak terpotong */
+    CROP.x0=CROP.x;CROP.y0=CROP.y;
     cropClamp();
     var box=document.getElementById('fotoCrop');if(!box)return;
     box.hidden=false;box.innerHTML='<div class="cv" id="cropBox" style="width:'+vw+'px;height:'+vh+'px;border-radius:'+(segi?'14px':'50%')+'"><canvas id="cropCv" width="'+vw*2+'" height="'+vh*2+'" aria-label="Pratonton potongan gambar"></canvas></div>'+
-     '<div class="ct"><small>Seret gambar untuk susun kedudukan, dan gunakan peluncur untuk zum.</small><input id="cropZ" type="range" min="1" max="4" step="0.01" value="1" aria-label="Zum"><div class="btns"><button type="button" class="btn pri" data-act="cropok">Guna gambar</button><button type="button" class="btn" data-act="cropno">Batal</button></div></div>';
+     '<div class="ct"><small>Seret gambar, atau guna butang anak panah untuk gerakkan sedikit demi sedikit (tekan lama untuk gerak berterusan). Zum dengan peluncur atau butang + dan −.</small>'+
+     '<div class="cropctl"><div class="dpad" role="group" aria-label="Gerakkan gambar"><span></span><button type="button" class="btn" data-act="cropmv" data-dx="0" data-dy="-1" aria-label="Gerak ke atas">▲</button><span></span><button type="button" class="btn" data-act="cropmv" data-dx="-1" data-dy="0" aria-label="Gerak ke kiri">◀</button><button type="button" class="btn" data-act="cropreset" aria-label="Set semula" title="Set semula">⟲</button><button type="button" class="btn" data-act="cropmv" data-dx="1" data-dy="0" aria-label="Gerak ke kanan">▶</button><span></span><button type="button" class="btn" data-act="cropmv" data-dx="0" data-dy="1" aria-label="Gerak ke bawah">▼</button><span></span></div>'+
+     '<div class="zrow"><button type="button" class="btn" data-act="cropzm" data-d="-1" aria-label="Zum keluar">−</button><input id="cropZ" type="range" min="0.5" max="4" step="0.01" value="1" aria-label="Zum"><button type="button" class="btn" data-act="cropzm" data-d="1" aria-label="Zum masuk">+</button></div></div><div class="btns"><button type="button" class="btn pri" data-act="cropok">Guna gambar</button><button type="button" class="btn" data-act="cropno">Batal</button></div></div>';
     cropRedraw();
   };
   im.onerror=function(){URL.revokeObjectURL(url);toast('Gambar tidak dapat dibaca')};
@@ -1310,7 +1363,19 @@ function cropExport(ow,oh,maxLen){
   document.addEventListener('pointerup',function(){drag=null});
   document.addEventListener('pointercancel',function(){drag=null});
   document.addEventListener('input',function(e){if(e.target.id==='cropZ'&&CROP)cropZoom(+e.target.value)});
-  document.addEventListener('wheel',function(e){var b=e.target.closest&&e.target.closest('#cropBox');if(!b||!CROP)return;e.preventDefault();var r=b.getBoundingClientRect();cropZoom(Math.min(4,Math.max(1,CROP.z*(e.deltaY<0?1.08:1/1.08))),(e.clientX-r.left)*CROP.vw/r.width,(e.clientY-r.top)*CROP.vh/r.height)},{passive:false});
+  var rep1=null,rep2=null;
+  function stopRep(){clearTimeout(rep1);clearInterval(rep2);rep1=rep2=null}
+  function mv(b){if(!CROP)return;var st=Math.max(2,CROP.vw*.03);CROP.x+=(+b.dataset.dx)*st;CROP.y+=(+b.dataset.dy)*st;cropClamp();cropRedraw()}
+  document.addEventListener('pointerdown',function(e){var b=e.target.closest&&e.target.closest('[data-act="cropmv"]');if(!b||!CROP)return;stopRep();b.dataset.ptr='1';mv(b);rep1=setTimeout(function(){rep2=setInterval(function(){mv(b)},55)},380)});
+  document.addEventListener('pointerup',stopRep);document.addEventListener('pointercancel',stopRep);document.addEventListener('pointerleave',stopRep);
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-act="cropmv"],[data-act="cropzm"],[data-act="cropreset"]');if(!b||!CROP)return;
+    var a=b.dataset.act;
+    if(a==='cropmv'){if(b.dataset.ptr){delete b.dataset.ptr}else mv(b)}
+    else if(a==='cropzm')cropZoom(Math.min(4,Math.max(.5,Math.round((CROP.z+(+b.dataset.d)*.1)*100)/100)));
+    else{CROP.sc=CROP.min;CROP.z=1;CROP.x=CROP.x0;CROP.y=CROP.y0;cropClamp();cropRedraw();var r=document.getElementById('cropZ');if(r)r.value=1}
+  });
+  document.addEventListener('wheel',function(e){var b=e.target.closest&&e.target.closest('#cropBox');if(!b||!CROP)return;e.preventDefault();var r=b.getBoundingClientRect();cropZoom(Math.min(4,Math.max(.5,CROP.z*(e.deltaY<0?1.08:1/1.08))),(e.clientX-r.left)*CROP.vw/r.width,(e.clientY-r.top)*CROP.vh/r.height)},{passive:false});
 })();
 function fotoResize(file,size,maxLen){
   return new Promise(function(res,rej){
@@ -2138,6 +2203,10 @@ document.addEventListener('click',function(e){
     var jobs=ps.map(function(p){var o=Object.assign({},p);delete o.id;return put('programs',p.id,o)});
     if(ms.length)jobs.push(putMany('pajsk',ms.map(function(m){return {id:m.id,data:{nama:m.nama,mula:m.mula,rekod:m.rekod||{},jantina:m.jantina||''}}})));
     Promise.all(jobs).then(function(){S.normP=[];S.normM=[];toast('Nama unit diseragamkan');render()}).catch(function(){toast('Gagal menyimpan, cuba lagi')})}
+  else if(a==='setcover'&&p){var dc=Object.assign({},p.dok||{});dc.cv={e:t.dataset.eid,x:50,y:50,z:1};put('programs',p.id,Object.assign(strip(p),{dok:dc})).then(function(){covAdj(p.id)})}
+  else if(a==='coveradj'&&p)covAdj(p.id);
+  else if(a==='cvno'){var cid=S.cv&&S.cv.id;S.cv=null;if(cid)showDetail(cid);else closeModal()}
+  else if(a==='cvsave'&&S.cv){var cp2=byId(S.cv.id),cv=S.cv;if(!cp2)return;var dd2=Object.assign({},cp2.dok||{});dd2.cv={e:cv.e,x:Math.round(cv.x*10)/10,y:Math.round(cv.y*10)/10,z:cv.z};S.cv=null;put('programs',cp2.id,Object.assign(strip(cp2),{dok:dd2})).then(function(){toast('Muka depan disimpan');showDetail(cp2.id)})}
   else if(a==='lognama')askNama(true);
   else if(a==='logbuka')logBuka();
   else if(a==='namalain')closeModal();
